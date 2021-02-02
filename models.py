@@ -33,7 +33,7 @@ class User(db.Model):
     home_location = db.Column(db.Text, nullable=False)
 
     @classmethod
-    def authenticate(cls, email, password):
+    def authenticate(email, password):
         u=User.query.get_or_404(email)
         if u and bcrypt.check_password_hash(u.password, password):
             return u
