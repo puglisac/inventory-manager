@@ -49,3 +49,41 @@ class User(db.Model):
             return u
         except:
             raise RuntimeError('something went wrong')
+
+class Item(db.Model):
+    """Item."""
+
+    def __repr__(self):
+        """Show info about item."""
+
+        i = self
+        return f"<Item {i.id} {i.name} {i.quantity} {i.image_path}>"
+
+    __tablename__ = "items"
+
+    id = db.Column(db.Integer,
+                      primary_key=True,
+                      autoincrement=True)
+    name = db.Column(db.Text, nullable=False)
+    quantity = db.Column(db.Integer, nullable=False)
+    image_path=db.Column(db.Text)
+
+class Category(db.Model):
+    """category."""
+
+    def __repr__(self):
+        """Show info about category."""
+
+        c = self
+        return f"<Item {c.id} {c.name} {c.description}>"
+
+    __tablename__ = "categories"
+
+    id = db.Column(db.Integer,
+                      primary_key=True,
+                      autoincrement=True)
+    name = db.Column(db.Text, nullable=False)
+    description = db.Column(db.Text, nullable=False)
+
+class Item_Category():
+    
