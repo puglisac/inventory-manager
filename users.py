@@ -37,4 +37,4 @@ def signup():
 def get_user():
     email=get_jwt_identity()
     u=User.query.get_or_404(email)
-    return jsonify({"email": u.email, "first_name": u.first_name, "last_name": u.last_name})
+    return jsonify({"email": u.email, "first_name": u.first_name, "last_name": u.last_name, 'pull_list': u.pull_list})

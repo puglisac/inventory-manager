@@ -1,5 +1,6 @@
 from flask import Flask
-from users.users import users_blueprint
+from users import users_blueprint
+from items import items_blueprint
 from models import db, connect_db
 from flask_jwt_extended import JWTManager, create_access_token
 import os
@@ -16,6 +17,7 @@ jwt = JWTManager(app)
 
 connect_db(app)
 app.register_blueprint(users_blueprint, url_prefix="/users")
+app.register_blueprint(items_blueprint, url_prefix="/items")
 
 db.create_all()
 

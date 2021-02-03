@@ -1,5 +1,6 @@
 from flask_sqlalchemy import SQLAlchemy
 from flask_bcrypt import Bcrypt
+from sqlalchemy_serializer import SerializerMixin
 
 db = SQLAlchemy()
 
@@ -51,14 +52,14 @@ class User(db.Model):
         except:
             raise RuntimeError('something went wrong')
 
-class Item(db.Model):
+class Item(db.Model, SerializerMixin):
     """Item."""
 
     def __repr__(self):
         """Show info about item."""
 
         i = self
-        return f"<Item {i.id} {i.name} {i.quantity} {i.image_path}>"
+        return f"<Item {i.id} {i.name} {i.quantity} {i.location} {i.description} {i.image_path}>"
 
     __tablename__ = "items"
 
@@ -66,12 +67,14 @@ class Item(db.Model):
                       primary_key=True,
                       autoincrement=True)
     name = db.Column(db.Text, nullable=False)
+    location = db.Column(db.Text, nullable=False)
+    description = db.Column(db.Text, nullable=False)
     quantity = db.Column(db.Integer, nullable=False)
     image_path=db.Column(db.Text)
     categories = db.relationship('Category', secondary='items_categories', backref='items')
 
 class Category(db.Model):
-    """category."""
+    """Category."""
 
     def __repr__(self):
         """Show info about category."""
@@ -87,7 +90,7 @@ class Category(db.Model):
     name = db.Column(db.Text, nullable=False)
     description = db.Column(db.Text, nullable=False)
 
-class Item_Category():
+class Item_Category(db.Model):
 
     __tablename__="items_categories"
 
@@ -95,20 +98,22 @@ class Item_Category():
                         primary_key=True,
                         autoincrement=True)
     item_id = db.Column(db.Integer,
-                        foreign_key='items.id', 
+                        db.ForeignKey('items.id'), 
                         nullable=False)
     category_id = db.Column(db.Integer,
-                        foreign_key='categories.id', 
+                        db.ForeignKey('categories.id'), 
                         nullable=False)
 
-class Pull_List():
+class Pull_List(db.Model):
+
+    __tablename__='pull_list'
 
     id=db.Column(db.Integer, 
-                    primaru_key=True,
+                    primary_key=True,
                     autoincrement=True)
     item_id = db.Column(db.Integer,
-                        foreign_key='items.id', 
+                        db.ForeignKey('items.id'), 
                         nullable=False)
     user_id = db.Column(db.Text,
-                        foreign_key='users.email', 
+                        db.ForeignKey('users.email'), 
                         nullable=False)
