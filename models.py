@@ -28,6 +28,7 @@ class User(db.Model):
     password = db.Column(db.Text, nullable=False)
     first_name = db.Column(db.Text, nullable=False)
     last_name = db.Column(db.Text, nullable=False)
+    pull_list = db.relationship('Item', secondary='pull_list', backref='user')
 
     @classmethod
     # authenticate a user
@@ -67,6 +68,7 @@ class Item(db.Model):
     name = db.Column(db.Text, nullable=False)
     quantity = db.Column(db.Integer, nullable=False)
     image_path=db.Column(db.Text)
+    categories = db.relationship('Category', secondary='items_categories', backref='items')
 
 class Category(db.Model):
     """category."""
@@ -86,4 +88,27 @@ class Category(db.Model):
     description = db.Column(db.Text, nullable=False)
 
 class Item_Category():
-    
+
+    __tablename__="items_categories"
+
+    id = db.Column(db.Integer, 
+                        primary_key=True,
+                        autoincrement=True)
+    item_id = db.Column(db.Integer,
+                        foreign_key='items.id', 
+                        nullable=False)
+    category_id = db.Column(db.Integer,
+                        foreign_key='categories.id', 
+                        nullable=False)
+
+class Pull_List():
+
+    id=db.Column(db.Integer, 
+                    primaru_key=True,
+                    autoincrement=True)
+    item_id = db.Column(db.Integer,
+                        foreign_key='items.id', 
+                        nullable=False)
+    user_id = db.Column(db.Text,
+                        foreign_key='users.email', 
+                        nullable=False)
