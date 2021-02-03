@@ -17,25 +17,35 @@ class User(db.Model):
         """Show info about user."""
 
         u = self
-        return f"<User {u.id} {u.email} {u.first_name} {u.last_name}>"
+        return f"<User {u.email} {u.first_name} {u.last_name}>"
 
     __tablename__ = "users"
 
-    id = db.Column(db.Integer,
-                   primary_key=True,
-                   autoincrement=True)
     email = db.Column(db.Text,
+                      primary_key=True,
                       nullable=False,
                       unique=True)
     password = db.Column(db.Text, nullable=False)
     first_name = db.Column(db.Text, nullable=False)
     last_name = db.Column(db.Text, nullable=False)
-    home_location = db.Column(db.Text, nullable=False)
 
     @classmethod
-    def authenticate(email, password):
+    # authenticate a user
+    def authenticate(cls, email, password):
         u=User.query.get_or_404(email)
         if u and bcrypt.check_password_hash(u.password, password):
             return u
         else: 
             return False
+    
+    @classmethod
+    # signs up a new user
+    def signup(cls, email, password, first_name, last_name):
+        hashed_password = bcrypt.generate_password_hash(password).decode("utf8")
+        u=cls(email=email, password=hashed_password, first_name=first_name, last_name=last_name)
+        db.session.add(u)
+        try:
+            db.session.commit()
+            return u
+        except:
+            raise RuntimeError('something went wrong')
