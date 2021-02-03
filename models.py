@@ -11,7 +11,7 @@ def connect_db(app):
     db.init_app(app)
 
 # models go below
-class User(db.Model):
+class User(db.Model, SerializerMixin):
     """User."""
 
     def __repr__(self):
