@@ -37,5 +37,4 @@ def signup():
 def get_user():
     email=get_jwt_identity()
     u=User.query.get_or_404(email)
-    # need to get password out of user when returning
-    return jsonify({"user": u.to_dict(rules=('-password'))})
+    return jsonify({"user": u.to_dict(rules=("-password", '-password'))})
