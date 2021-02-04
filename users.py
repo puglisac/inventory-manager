@@ -14,7 +14,7 @@ def login():
             access_token = create_access_token(identity=request.json['email'])
             return jsonify(access_token=access_token)
     except:
-        return {"msg":"invalid login"}
+        return {"msg":"invalid login"}, 500
 
 @users_blueprint.route('/signup', methods=['POST'])
 def signup():
@@ -28,9 +28,9 @@ def signup():
     try:
         User.signup(email, password, first_name, last_name)
         access_token = create_access_token(identity=request.json['email'])
-        return jsonify(access_token=access_token)
+        return jsonify(access_token=access_token), 201
     except:
-        return {"msg":"invalid signup"}
+        return {"msg":"invalid signup"}, 500
 
 @users_blueprint.route('/<email>')
 @jwt_required
@@ -58,7 +58,7 @@ def update_user(email):
         updated_user=User.query.get_or_404(email)
         return jsonify({'user': updated_user.to_dict()})
     except:
-        return jsonify({'msg': 'unable to edit user'})
+        return jsonify({'msg': 'unable to edit user'}), 500
 
 @users_blueprint.route('/<email>', methods=['DELETE'])
 @jwt_required
@@ -72,7 +72,7 @@ def delete_user(email):
         db.session.commit()
         return jsonify({'msg': 'user successfully deleted'})
     except:
-        return jsonify({'msg': 'unable to delete user'})
+        return jsonify({'msg': 'unable to delete user'}), 500
 
 @users_blueprint.route('/<email>/add_item', methods=["PATCH"])
 @jwt_required
@@ -84,9 +84,12 @@ def add_item_to_user(email):
     item = Item.query.get_or_404(request.json['item_id'])
     user.pull_list.append(item)
     db.session.add(user)
-    db.session.commit()
-    updated_user = User.query.get_or_404(email)
-    return jsonify({'user': updated_user.to_dict()})
+    try: 
+        db.session.commit()
+        updated_user = User.query.get_or_404(email)
+        return jsonify({'user': updated_user.to_dict()})
+    except: 
+        return {'msg': 'unable to add item'}, 500
 
 @users_blueprint.route('/<email>/remove_item', methods=["DELETE"])
 @jwt_required
@@ -96,7 +99,10 @@ def remove_item_from_user(email):
     if email != token_user:
         return {'msg': 'unauthorized'}, 401
     item_to_remove = Pull_List.query.filter(Pull_List.user_id==email, Pull_List.item_id==request.json['item_id']).first_or_404(description="item not found in pull_list")
-    db.session.delete(item_to_remove)
-    db.session.commit()
-    updated_user = User.query.get_or_404(email)
-    return jsonify({'user': updated_user.to_dict()})
+    db.session.delete(item_to_remove) 
+    try:
+        db.session.commit()
+        updated_user = User.query.get_or_404(email)
+        return jsonify({'user': updated_user.to_dict()})
+    except: 
+        return {'msg':'unable to remove item'}, 500

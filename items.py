@@ -27,9 +27,9 @@ def add_item():
     db.session.add(item)
     try: 
         db.session.commit()
-        return jsonify({"item": item.to_dict()})
+        return jsonify({"item": item.to_dict()}), 201
     except: 
-        return {'msg':'unable to add item'}
+        return {'msg':'unable to add item'}, 500
 
 @items_blueprint.route('/<int:item_id>')
 @jwt_required
@@ -51,7 +51,7 @@ def update_item(item_id):
         updated_item=Item.query.get_or_404(item_id)
         return jsonify({'item': updated_item.to_dict()})
     except:
-        return jsonify({'msg': 'unable to edit item'})
+        return jsonify({'msg': 'unable to edit item'}), 500
 
 @items_blueprint.route('/<int:item_id>', methods=['DELETE'])
 @jwt_required
@@ -62,4 +62,4 @@ def delete_item(item_id):
         db.session.commit()
         return jsonify({'msg': 'item successfully deleted'})
     except:
-        return jsonify({'msg': 'unable to delete item'})
+        return jsonify({'msg': 'unable to delete item'}), 500
