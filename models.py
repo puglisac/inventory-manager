@@ -48,12 +48,7 @@ class User(db.Model, SerializerMixin):
     def signup(cls, email, password, first_name, last_name):
         hashed_password = bcrypt.generate_password_hash(password).decode("utf8")
         u=cls(email=email, password=hashed_password, first_name=first_name, last_name=last_name)
-        db.session.add(u)
-        try:
-            db.session.commit()
-            return u
-        except:
-            raise RuntimeError('something went wrong')
+        return u
 
 class Item(db.Model, SerializerMixin):
     """Item."""

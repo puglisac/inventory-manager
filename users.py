@@ -1,9 +1,12 @@
 from flask import Blueprint, request, jsonify
+from sqlalchemy.exc import IntegrityError
 from models import User, db, Item, Pull_List
 from flask_jwt_extended import (
     jwt_required, create_access_token,
     get_jwt_identity
 )
+
+
 
 users_blueprint = Blueprint('users_blueprint', __name__)
 
@@ -25,12 +28,14 @@ def signup():
     first_name=d['first_name']
     last_name=d['last_name']
 
+    new_user = User.signup(email, password, first_name, last_name)
+    db.session.add(new_user)
     try:
-        User.signup(email, password, first_name, last_name)
+        db.session.commit()
         access_token = create_access_token(identity=request.json['email'])
         return jsonify(access_token=access_token), 201
-    except:
-        return {"msg":"invalid signup"}, 500
+    except IntegrityError:
+        return {"msg":"email already in use"}, 500
 
 @users_blueprint.route('/<email>')
 @jwt_required
