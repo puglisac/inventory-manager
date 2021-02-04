@@ -82,7 +82,7 @@ def delete_user(email):
 @users_blueprint.route('/<email>/add_item', methods=["PATCH"])
 @jwt_required
 def add_item_to_user(email):
-    user=User.query.get_or_404(email)
+    user=User.query.get_or_404(email, description="user not found")
     token_user=get_jwt_identity()
     if email != token_user:
         return {'msg': 'unauthorized'}, 401
@@ -99,7 +99,6 @@ def add_item_to_user(email):
 @users_blueprint.route('/<email>/remove_item', methods=["DELETE"])
 @jwt_required
 def remove_item_from_user(email):
-    user=User.query.get_or_404(email, description="user not found")
     token_user=get_jwt_identity()
     if email != token_user:
         return {'msg': 'unauthorized'}, 401

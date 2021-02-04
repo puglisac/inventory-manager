@@ -1,5 +1,5 @@
 from flask import Blueprint, request, jsonify
-from models import Item, db
+from models import Category, Item, Item_Category, db
 from flask_jwt_extended import (
     jwt_required, create_access_token,
     get_jwt_identity
@@ -63,3 +63,29 @@ def delete_item(item_id):
         return jsonify({'msg': 'item successfully deleted'})
     except:
         return jsonify({'msg': 'unable to delete item'}), 500
+
+@items_blueprint.route('/<int:item_id>/add_category', methods=["PATCH"])
+@jwt_required
+def add_item_to_user(item_id):
+    item=Item.query.get_or_404(item_id, description="item not found")
+    category = Category.query.get_or_404(request.json['item_id'], description="category not found")
+    item.categories.append(category)
+    db.session.add(item)
+    try: 
+        db.session.commit()
+        updated_item = Item.query.get_or_404(item_id)
+        return jsonify({'item': updated_item.to_dict()})
+    except: 
+        return {'msg': 'unable to add item'}, 500
+
+@items_blueprint.route('/<int:item_id>/remove_category', methods=["DELETE"])
+@jwt_required
+def remove_item_from_user(item_id):
+    category_to_remove = Item_Category.query.filter(Item_Category.item_id==item_id, Item_Category.category_id==request.json['category_id']).first_or_404(description="category not assigned to item")
+    db.session.delete(category_to_remove) 
+    try:
+        db.session.commit()
+        updated_item = Item.query.get_or_404(item_id)
+        return jsonify({'item': updated_item.to_dict()})
+    except: 
+        return {'msg':'unable to remove category'}, 500

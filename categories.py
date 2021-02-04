@@ -60,3 +60,4 @@ def delete_category(category_id):
         return jsonify({'msg': 'category successfully deleted'})
     except:
         return jsonify({'msg': 'unable to delete category'}), 500
+
