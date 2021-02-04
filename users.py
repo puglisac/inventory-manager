@@ -1,5 +1,5 @@
 from flask import Blueprint, request, jsonify
-from models import User, db, Item
+from models import User, db, Item, Pull_List
 from flask_jwt_extended import (
     jwt_required, create_access_token,
     get_jwt_identity
@@ -35,12 +35,18 @@ def signup():
 @users_blueprint.route('/<email>')
 @jwt_required
 def get_user(email):
+    token_user=get_jwt_identity()
+    if email != token_user:
+        return {'msg': 'unauthorized'}, 401
     u=User.query.get_or_404(email)
     return jsonify({"user": u.to_dict()})
 
 @users_blueprint.route('/<email>', methods=['PATCH'])
 @jwt_required
 def update_user(email):
+    token_user=get_jwt_identity()
+    if email != token_user:
+        return {'msg': 'unauthorized'}, 401
     d=request.json
     user=User.query.get_or_404(email)
     for update in d:
@@ -50,7 +56,7 @@ def update_user(email):
     try: 
         db.session.commit()
         updated_user=User.query.get_or_404(email)
-        return jsonify({'item': updated_user.to_dict()})
+        return jsonify({'user': updated_user.to_dict()})
     except:
         return jsonify({'msg': 'unable to edit user'})
 
@@ -72,9 +78,22 @@ def add_item_to_user(email):
     token_user=get_jwt_identity()
     if email != token_user:
         return {'msg': 'unauthorized'}, 401
-    item = Item.query.get_or_404(request.json['category_id'])
+    item = Item.query.get_or_404(request.json['item_id'])
     user.pull_list.append(item)
     db.session.add(user)
     db.session.commit()
     updated_user = User.query.get_or_404(email)
-    return jsonify({'item': updated_user.to_dict()})
+    return jsonify({'user': updated_user.to_dict()})
+
+@users_blueprint.route('/<email>/remove_item', methods=["DELETE"])
+@jwt_required
+def remove_item_from_user(email):
+    user=User.query.get_or_404(email)
+    token_user=get_jwt_identity()
+    if email != token_user:
+        return {'msg': 'unauthorized'}, 401
+    item_to_remove = Pull_List.query.filter(Pull_List.user_id==email, Pull_List.item_id==request.json['item_id']).first_or_404()
+    db.session.delete(item_to_remove)
+    db.session.commit()
+    updated_user = User.query.get_or_404(email)
+    return jsonify({'user': updated_user.to_dict()})
