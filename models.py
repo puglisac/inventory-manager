@@ -62,7 +62,7 @@ class Item(db.Model, SerializerMixin):
     __tablename__ = "items"
 
     # rules to excludebackref from serialization
-    serialize_rules = ('-categories.ites',)
+    serialize_rules = ('-categories.items',)
 
     id = db.Column(db.Integer,
                       primary_key=True,
@@ -74,7 +74,7 @@ class Item(db.Model, SerializerMixin):
     image_path=db.Column(db.Text)
     categories = db.relationship('Category', secondary='items_categories', backref='items')
 
-class Category(db.Model):
+class Category(db.Model, SerializerMixin):
     """Category."""
 
     def __repr__(self):
