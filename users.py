@@ -1,5 +1,5 @@
 from flask import Blueprint, request, jsonify
-from models import User, db
+from models import User, db, Item
 from flask_jwt_extended import (
     jwt_required, create_access_token,
     get_jwt_identity
@@ -36,7 +36,7 @@ def signup():
 @jwt_required
 def get_user(email):
     u=User.query.get_or_404(email)
-    return jsonify({"user": u.to_dict(rules=("-password", '-password'))})
+    return jsonify({"user": u.to_dict()})
 
 @users_blueprint.route('/<email>', methods=['PATCH'])
 @jwt_required
@@ -50,7 +50,7 @@ def update_user(email):
     try: 
         db.session.commit()
         updated_user=User.query.get_or_404(email)
-        return jsonify({'item': updated_user.to_dict(rules=('-password', '-password'))})
+        return jsonify({'item': updated_user.to_dict()})
     except:
         return jsonify({'msg': 'unable to edit user'})
 
@@ -64,3 +64,17 @@ def delete_user(email):
         return jsonify({'msg': 'user successfully deleted'})
     except:
         return jsonify({'msg': 'unable to delete user'})
+
+@users_blueprint.route('/<email>/add_item', methods=["PATCH"])
+@jwt_required
+def add_item_to_user(email):
+    user=User.query.get_or_404(email)
+    token_user=get_jwt_identity()
+    if email != token_user:
+        return {'msg': 'unauthorized'}, 401
+    item = Item.query.get_or_404(request.json['category_id'])
+    user.pull_list.append(item)
+    db.session.add(user)
+    db.session.commit()
+    updated_user = User.query.get_or_404(email)
+    return jsonify({'item': updated_user.to_dict()})

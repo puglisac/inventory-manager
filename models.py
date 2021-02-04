@@ -1,6 +1,6 @@
 from flask_sqlalchemy import SQLAlchemy
 from flask_bcrypt import Bcrypt
-from sqlalchemy_serializer import SerializerMixin
+from sqlalchemy_serializer.serializer import SerializerMixin
 
 db = SQLAlchemy()
 
@@ -21,6 +21,9 @@ class User(db.Model, SerializerMixin):
         return f"<User {u.email} {u.first_name} {u.last_name}>"
 
     __tablename__ = "users"
+
+# rules to exclude password and backref from serialization
+    serialize_rules = ('-pull_list.user','-password')
 
     email = db.Column(db.Text,
                       primary_key=True,
@@ -62,6 +65,9 @@ class Item(db.Model, SerializerMixin):
         return f"<Item {i.id} {i.name} {i.quantity} {i.location} {i.description} {i.image_path}>"
 
     __tablename__ = "items"
+
+    # rules to excludebackref from serialization
+    serialize_rules = ('-categories.ites',)
 
     id = db.Column(db.Integer,
                       primary_key=True,
