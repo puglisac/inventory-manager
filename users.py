@@ -38,7 +38,7 @@ def get_user(email):
     token_user=get_jwt_identity()
     if email != token_user:
         return {'msg': 'unauthorized'}, 401
-    u=User.query.get_or_404(email)
+    u=User.query.get_or_404(email, description="user not found")
     return jsonify({"user": u.to_dict()})
 
 @users_blueprint.route('/<email>', methods=['PATCH'])
@@ -48,7 +48,7 @@ def update_user(email):
     if email != token_user:
         return {'msg': 'unauthorized'}, 401
     d=request.json
-    user=User.query.get_or_404(email)
+    user=User.query.get_or_404(email, description="user not found")
     for update in d:
         if update != 'id':
             setattr(user, update, d[update])
@@ -63,7 +63,10 @@ def update_user(email):
 @users_blueprint.route('/<email>', methods=['DELETE'])
 @jwt_required
 def delete_user(email):
-    user=User.query.get_or_404(email)
+    token_user=get_jwt_identity()
+    if email != token_user:
+        return {'msg': 'unauthorized'}, 401
+    user=User.query.get_or_404(email, description="user not found")
     db.session.delete(user)
     try:
         db.session.commit()
@@ -88,11 +91,11 @@ def add_item_to_user(email):
 @users_blueprint.route('/<email>/remove_item', methods=["DELETE"])
 @jwt_required
 def remove_item_from_user(email):
-    user=User.query.get_or_404(email)
+    user=User.query.get_or_404(email, description="user not found")
     token_user=get_jwt_identity()
     if email != token_user:
         return {'msg': 'unauthorized'}, 401
-    item_to_remove = Pull_List.query.filter(Pull_List.user_id==email, Pull_List.item_id==request.json['item_id']).first_or_404()
+    item_to_remove = Pull_List.query.filter(Pull_List.user_id==email, Pull_List.item_id==request.json['item_id']).first_or_404(description="item not found in pull_list")
     db.session.delete(item_to_remove)
     db.session.commit()
     updated_user = User.query.get_or_404(email)
