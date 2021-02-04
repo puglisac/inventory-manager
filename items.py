@@ -46,19 +46,20 @@ def update_item(item_id):
         if update != 'id':
             setattr(item, update, d[update])
     db.session.add(item)
-    db.session.commit()
-    updated_item=Item.query.get_or_404(item_id)
-    return jsonify({'item': updated_item.to_dict()})
+    try: 
+        db.session.commit()
+        updated_item=Item.query.get_or_404(item_id)
+        return jsonify({'item': updated_item.to_dict()})
+    except:
+        return jsonify({'msg': 'unable to edit item'})
 
-# @items_blueprint.route('/<int:item_id>', methods=['PATCH'])
-# @jwt_required
-# def update_item(item_id):
-#     d=request.json
-#     item=Item.query.get_or_404(item_id)
-#     for update in d:
-#         if update != 'id':
-#             setattr(item, update, d[update])
-#     db.session.add(item)
-#     db.session.commit()
-#     updated_item=Item.query.get_or_404(item_id)
-#     return jsonify({'item': updated_item.to_dict()})
+@items_blueprint.route('/<int:item_id>', methods=['DELETE'])
+@jwt_required
+def delete_item(item_id):
+    item=Item.query.get_or_404(item_id)
+    db.session.delete(item)
+    try:
+        db.session.commit()
+        return jsonify({'msg': 'item successfully deleted'})
+    except:
+        return jsonify({'msg': 'unable to delete item'})

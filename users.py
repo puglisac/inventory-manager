@@ -1,5 +1,5 @@
 from flask import Blueprint, request, jsonify
-from models import User
+from models import User, db
 from flask_jwt_extended import (
     jwt_required, create_access_token,
     get_jwt_identity
@@ -32,9 +32,35 @@ def signup():
     except:
         return {"msg":"invalid signup"}
 
-@users_blueprint.route('/')
+@users_blueprint.route('/<email>')
 @jwt_required
-def get_user():
-    email=get_jwt_identity()
+def get_user(email):
     u=User.query.get_or_404(email)
     return jsonify({"user": u.to_dict(rules=("-password", '-password'))})
+
+@users_blueprint.route('/<email>', methods=['PATCH'])
+@jwt_required
+def update_user(email):
+    d=request.json
+    user=User.query.get_or_404(email)
+    for update in d:
+        if update != 'id':
+            setattr(user, update, d[update])
+    db.session.add(user)
+    try: 
+        db.session.commit()
+        updated_user=User.query.get_or_404(email)
+        return jsonify({'item': updated_user.to_dict(rules=('-password', '-password'))})
+    except:
+        return jsonify({'msg': 'unable to edit user'})
+
+@users_blueprint.route('/<email>', methods=['DELETE'])
+@jwt_required
+def delete_user(email):
+    user=User.query.get_or_404(email)
+    db.session.delete(user)
+    try:
+        db.session.commit()
+        return jsonify({'msg': 'user successfully deleted'})
+    except:
+        return jsonify({'msg': 'unable to delete user'})
