@@ -10,7 +10,12 @@ items_blueprint = Blueprint('items_blueprint', __name__)
 @items_blueprint.route('/')
 @jwt_required
 def get_items():
-    items=Item.query.all()
+    if request.args:
+        category = request.args.categories
+        items = Item.query.filter_by(Item.categories.contains(category)).all()
+        return 
+    else: 
+        items=Item.query.all()
     serialized_items=[i.to_dict() for i in items]
     return jsonify({"items": serialized_items})
 
@@ -66,7 +71,7 @@ def delete_item(item_id):
 
 @items_blueprint.route('/<int:item_id>/add_category', methods=["PATCH"])
 @jwt_required
-def add_item_to_user(item_id):
+def add_category_to_item(item_id):
     item=Item.query.get_or_404(item_id, description="item not found")
     category = Category.query.get_or_404(request.json['item_id'], description="category not found")
     item.categories.append(category)
@@ -80,7 +85,7 @@ def add_item_to_user(item_id):
 
 @items_blueprint.route('/<int:item_id>/remove_category', methods=["DELETE"])
 @jwt_required
-def remove_item_from_user(item_id):
+def remove_category_from_item(item_id):
     category_to_remove = Item_Category.query.filter(Item_Category.item_id==item_id, Item_Category.category_id==request.json['category_id']).first_or_404(description="category not assigned to item")
     db.session.delete(category_to_remove) 
     try:
