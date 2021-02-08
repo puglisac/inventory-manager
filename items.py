@@ -11,9 +11,10 @@ items_blueprint = Blueprint('items_blueprint', __name__)
 @jwt_required
 def get_items():
     if request.args:
-        category = request.args.categories
-        items = Item.query.filter_by(Item.categories.contains(category)).all()
-        return 
+        category = Category.query.get(1)
+        category2 = Category.query.get(2)
+        arr=[category, category2]
+        items = Item.query.filter(Item.categories.contains(category), Item.categories.contains(category2))
     else: 
         items=Item.query.all()
     serialized_items=[i.to_dict() for i in items]
@@ -73,7 +74,7 @@ def delete_item(item_id):
 @jwt_required
 def add_category_to_item(item_id):
     item=Item.query.get_or_404(item_id, description="item not found")
-    category = Category.query.get_or_404(request.json['item_id'], description="category not found")
+    category = Category.query.get_or_404(request.json['category_id'], description="category not found")
     item.categories.append(category)
     db.session.add(item)
     try: 
