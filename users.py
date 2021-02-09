@@ -20,12 +20,8 @@ def login():
         return {"msg":"invalid login"}, 500
 
 @users_blueprint.route('/signup', methods=['POST'])
-@jwt_required
 def signup():
-    token_user=get_jwt_identity()
-    accessing_user = User.query.get_or_404(token_user)
-    if accessing_user.is_admin==False:
-        return {'msg': 'unauthorized'}, 401
+
     d=request.json
 
     email=d['email']
@@ -47,7 +43,8 @@ def signup():
 def get_user(email):
     token_user=get_jwt_identity()
     accessing_user = User.query.get_or_404(token_user)
-    if email != accessing_user.email or accessing_user.is_admin==False:
+    print(email, accessing_user.email)
+    if email != accessing_user.email and accessing_user.is_admin==False:
         return {'msg': 'unauthorized'}, 401
     u=User.query.get_or_404(email, description="user not found")
     return jsonify({"user": u.to_dict()})
@@ -57,13 +54,16 @@ def get_user(email):
 def update_user(email):
     token_user=get_jwt_identity()
     accessing_user = User.query.get_or_404(token_user)
-    if email != accessing_user.email or accessing_user.is_admin==False:
+    if email != accessing_user.email and accessing_user.is_admin==False:
         return {'msg': 'unauthorized'}, 401
     d=request.json
     user=User.query.get_or_404(email, description="user not found")
     for update in d:
         if update != 'id':
-            setattr(user, update, d[update])
+            if update == 'is_admin' and accessing_user.is_admin:
+                setattr(user, update, d[update])
+            else:
+                setattr(user, update, d[update])
     db.session.add(user)
     try: 
         db.session.commit()
@@ -77,7 +77,7 @@ def update_user(email):
 def delete_user(email):
     token_user=get_jwt_identity()
     accessing_user = User.query.get_or_404(token_user)
-    if email != accessing_user.email or accessing_user.is_admin==False:
+    if email != accessing_user.email and accessing_user.is_admin==False:
         return {'msg': 'unauthorized'}, 401
     user=User.query.get_or_404(email, description="user not found")
     db.session.delete(user)
