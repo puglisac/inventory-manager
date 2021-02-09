@@ -12,9 +12,13 @@ items_blueprint = Blueprint('items_blueprint', __name__)
 @jwt_required
 def get_items():
     if request.args:
-        arr=[1,2]
-        # join items and categories
-        items = Item.query.filter(Item.categories.any(Category.id.in_(arr))).group_by(Item.id).having(func.count(Category.name)== len(arr))
+        category_arr=[]
+        for category in request.args['category_id']:
+            category_arr.append(category)
+        items = Item.query.join(Item.categories).filter(
+            Item.categories.any(Category.id.in_(category_arr))
+            ).group_by(Item.id).having(
+            func.count(Category.name) >= len(category_arr))
     else: 
         items=Item.query.all()
     serialized_items=[i.to_dict() for i in items]
