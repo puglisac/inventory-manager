@@ -28,6 +28,12 @@ def get_items():
 @items_blueprint.route('/', methods=['POST'])
 @jwt_required
 def add_item():
+
+    token_user=get_jwt_identity()
+    accessing_user = User.query.get_or_404(token_user)
+    if accessing_user.is_admin==False:
+        return {'msg': 'unauthorized'}, 401
+
     # add new item. 
     d=request.json
     name = d['name']
@@ -57,6 +63,12 @@ def get_item(item_id):
 @items_blueprint.route('/<int:item_id>', methods=['PATCH'])
 @jwt_required
 def update_item(item_id):
+
+    token_user=get_jwt_identity()
+    accessing_user = User.query.get_or_404(token_user)
+    if accessing_user.is_admin==False:
+        return {'msg': 'unauthorized'}, 401
+
     # update item by id
     d=request.json
     item=Item.query.get_or_404(item_id)
@@ -74,6 +86,12 @@ def update_item(item_id):
 @items_blueprint.route('/<int:item_id>', methods=['DELETE'])
 @jwt_required
 def delete_item(item_id):
+
+    token_user=get_jwt_identity()
+    accessing_user = User.query.get_or_404(token_user)
+    if accessing_user.is_admin==False:
+        return {'msg': 'unauthorized'}, 401
+
     # deletes an item by id
     item=Item.query.get_or_404(item_id)
     db.session.delete(item)
@@ -86,6 +104,12 @@ def delete_item(item_id):
 @items_blueprint.route('/<int:item_id>/add_category', methods=["PATCH"])
 @jwt_required
 def add_category_to_item(item_id):
+
+    token_user=get_jwt_identity()
+    accessing_user = User.query.get_or_404(token_user)
+    if accessing_user.is_admin==False:
+        return {'msg': 'unauthorized'}, 401
+
     # adds a category to an item
     item=Item.query.get_or_404(item_id, description="item not found")
     category = Category.query.get_or_404(request.json['category_id'], description="category not found")
@@ -101,6 +125,12 @@ def add_category_to_item(item_id):
 @items_blueprint.route('/<int:item_id>/remove_category', methods=["DELETE"])
 @jwt_required
 def remove_category_from_item(item_id):
+
+    token_user=get_jwt_identity()
+    accessing_user = User.query.get_or_404(token_user)
+    if accessing_user.is_admin==False:
+        return {'msg': 'unauthorized'}, 401
+
     # removes a category from an item
     category_to_remove = Item_Category.query.filter(Item_Category.item_id==item_id, Item_Category.category_id==request.json['category_id']).first_or_404(description="category not assigned to item")
     db.session.delete(category_to_remove) 

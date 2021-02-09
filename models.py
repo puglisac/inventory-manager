@@ -32,6 +32,7 @@ class User(db.Model, SerializerMixin):
     password = db.Column(db.Text, nullable=False)
     first_name = db.Column(db.Text, nullable=False)
     last_name = db.Column(db.Text, nullable=False)
+    is_admin = db.Column(db.Boolean, default=False)
     pull_list = db.relationship('Item', secondary='pull_list', backref='user')
 
     @classmethod

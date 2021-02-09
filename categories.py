@@ -1,5 +1,5 @@
 from flask import Blueprint, request, jsonify
-from models import Category, db
+from models import Category, User, db
 from flask_jwt_extended import (
     jwt_required, create_access_token,
     get_jwt_identity
@@ -17,6 +17,11 @@ def get_categories():
 @categories_blueprint.route('/', methods=['POST'])
 @jwt_required
 def add_category():
+    token_user=get_jwt_identity()
+    accessing_user = User.query.get_or_404(token_user)
+    if accessing_user.is_admin==False:
+        return {'msg': 'unauthorized'}, 401
+
     d=request.json
     name = d['name']
     description = d['description']
@@ -37,6 +42,12 @@ def get_category(category_id):
 @categories_blueprint.route('/<int:category_id>', methods=['PATCH'])
 @jwt_required
 def update_category(category_id):
+
+    token_user=get_jwt_identity()
+    accessing_user = User.query.get_or_404(token_user)
+    if accessing_user.is_admin==False:
+        return {'msg': 'unauthorized'}, 401
+
     d=request.json
     category=Category.query.get_or_404(category_id)
     for update in d:
@@ -53,6 +64,12 @@ def update_category(category_id):
 @categories_blueprint.route('/<int:category_id>', methods=['DELETE'])
 @jwt_required
 def delete_category(category_id):
+
+    token_user=get_jwt_identity()
+    accessing_user = User.query.get_or_404(token_user)
+    if accessing_user.is_admin==False:
+        return {'msg': 'unauthorized'}, 401
+
     category=Category.query.get_or_404(category_id)
     db.session.delete(category)
     try:
