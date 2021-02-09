@@ -1,4 +1,5 @@
 from flask import Blueprint, request, jsonify
+from sqlalchemy import func
 from models import Category, Item, Item_Category, db
 from flask_jwt_extended import (
     jwt_required, create_access_token,
@@ -11,10 +12,9 @@ items_blueprint = Blueprint('items_blueprint', __name__)
 @jwt_required
 def get_items():
     if request.args:
-        category = Category.query.get(1)
-        category2 = Category.query.get(2)
-        arr=[category, category2]
-        items = Item.query.filter(Item.categories.contains(category), Item.categories.contains(category2))
+        arr=[1,2]
+        # join items and categories
+        items = Item.query.filter(Item.categories.any(Category.id.in_(arr))).group_by(Item.id).having(func.count(Category.name)== len(arr))
     else: 
         items=Item.query.all()
     serialized_items=[i.to_dict() for i in items]
