@@ -11,6 +11,7 @@ items_blueprint = Blueprint('items_blueprint', __name__)
 @items_blueprint.route('/')
 @jwt_required
 def get_items():
+    # get all items. can accept array of category_ids in query string to filter by categories
     if request.args:
         category_arr=[]
         for category in request.args['category_id']:
@@ -27,13 +28,18 @@ def get_items():
 @items_blueprint.route('/', methods=['POST'])
 @jwt_required
 def add_item():
+    # add new item. 
     d=request.json
     name = d['name']
     location = d['location']
     description = d['description']
     quantity = d['quantity']
     image_path = d['image_path']
-    item=Item(name=name, location=location, description=description, quantity=quantity, image_path=image_path)
+    item=Item(name=name, 
+                location=location, 
+                description=description, 
+                quantity=quantity, 
+                image_path=image_path)
     db.session.add(item)
     try: 
         db.session.commit()
@@ -44,12 +50,14 @@ def add_item():
 @items_blueprint.route('/<int:item_id>')
 @jwt_required
 def get_item(item_id):
+    # get item by id
     item=Item.query.get_or_404(item_id)
     return jsonify({'item': item.to_dict()})
 
 @items_blueprint.route('/<int:item_id>', methods=['PATCH'])
 @jwt_required
 def update_item(item_id):
+    # update item by id
     d=request.json
     item=Item.query.get_or_404(item_id)
     for update in d:
@@ -66,6 +74,7 @@ def update_item(item_id):
 @items_blueprint.route('/<int:item_id>', methods=['DELETE'])
 @jwt_required
 def delete_item(item_id):
+    # deletes an item by id
     item=Item.query.get_or_404(item_id)
     db.session.delete(item)
     try:
@@ -77,6 +86,7 @@ def delete_item(item_id):
 @items_blueprint.route('/<int:item_id>/add_category', methods=["PATCH"])
 @jwt_required
 def add_category_to_item(item_id):
+    # adds a category to an item
     item=Item.query.get_or_404(item_id, description="item not found")
     category = Category.query.get_or_404(request.json['category_id'], description="category not found")
     item.categories.append(category)
@@ -91,6 +101,7 @@ def add_category_to_item(item_id):
 @items_blueprint.route('/<int:item_id>/remove_category', methods=["DELETE"])
 @jwt_required
 def remove_category_from_item(item_id):
+    # removes a category from an item
     category_to_remove = Item_Category.query.filter(Item_Category.item_id==item_id, Item_Category.category_id==request.json['category_id']).first_or_404(description="category not assigned to item")
     db.session.delete(category_to_remove) 
     try:
