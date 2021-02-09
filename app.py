@@ -1,4 +1,5 @@
 from flask import Flask
+from flask_cors import CORS
 from users import users_blueprint
 from items import items_blueprint
 from categories import categories_blueprint
@@ -7,6 +8,7 @@ from flask_jwt_extended import JWTManager, create_access_token
 import os
 
 app = Flask(__name__)
+CORS(app)
 
 app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DATABASE_URI')
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
