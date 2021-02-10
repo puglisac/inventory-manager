@@ -114,7 +114,8 @@ def delete_item(item_id):
 @items_blueprint.route('/<int:item_id>/add_category', methods=["PATCH"])
 @jwt_required
 def add_category_to_item(item_id):
-    # add a category tag to an item. requires user to be admin
+    # updates an item's category tags. requires user to be admin
+    # accepts string of category ids separated by a comma. ex: "1,2,3"
 
     # check JWT identity and return unauthorized message if user not authorized
     token_user=get_jwt_identity()
@@ -122,10 +123,17 @@ def add_category_to_item(item_id):
     if accessing_user.is_admin==False:
         return {'msg': 'unauthorized'}, 401
 
-    # get item and category and append category to item.categories
+    # get item and categories and set array of categories to items.categories
     item=Item.query.get_or_404(item_id, description="item not found")
-    category = Category.query.get_or_404(request.json['category_id'], description="category not found")
-    item.categories.append(category)
+    categories_to_add=[]
+    
+    if request.json['category_id']:
+        category_ids = request.json['category_id'].split(",")
+        for id in category_ids:
+            category = Category.query.get_or_404(id, description="category not found")
+            categories_to_add.append(category)
+
+    item.categories=categories_to_add
     db.session.add(item)
     try: 
         # commit to db and return item
