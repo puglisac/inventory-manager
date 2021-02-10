@@ -13,9 +13,7 @@ items_blueprint = Blueprint('items_blueprint', __name__)
 def get_items():
     # get all items. can accept array of category_ids in query string to filter by categories
     if request.args:
-        category_arr=[]
-        for category in request.args['category_id']:
-            category_arr.append(category)
+        category_arr = request.args['category_id'].split(",")
         items = Item.query.join(Item.categories).filter(
             Item.categories.any(Category.id.in_(category_arr))
             ).group_by(Item.id).having(
