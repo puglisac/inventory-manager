@@ -21,8 +21,18 @@ def login():
         return {"msg":"invalid login"}, 500
 
 @users_blueprint.route('/signup', methods=['POST'])
+@jwt_required
 def signup():
     # signup a user
+    
+    # check JWT identity is same as email or user is an admin
+    token_user=get_jwt_identity()
+    accessing_user = User.query.get_or_404(token_user)
+
+    # return unauthorized message if user not authorized
+    if accessing_user.is_admin==False:
+        return {'msg': 'unauthorized'}, 401
+
     d=request.json
 
     email=d['email']
@@ -135,7 +145,7 @@ def add_item_to_user(email):
     except: 
         return {'msg': 'unable to add item'}, 500
 
-@users_blueprint.route('/<email>/remove_item', methods=["DELETE"])
+@users_blueprint.route('/<email>/remove_item', methods=["PATCH"])
 @jwt_required
 def remove_item_from_user(email):
     # remove item from user's pull list
@@ -148,8 +158,9 @@ def remove_item_from_user(email):
         return {'msg': 'unauthorized'}, 401
     
     # get item and delete from session
-    item_to_remove = Pull_List.query.filter(Pull_List.user_id==email, Pull_List.item_id==request.json['item_id']).first_or_404(description="item not found in pull_list")
-    db.session.delete(item_to_remove) 
+    item_to_remove = Item.query.get_or_404(request.json['item_id'],description="item not found in pull_list")
+    item_to_remove['user']=None
+    db.session.add(item_to_remove) 
     try:
         # commit to db and return updated user
         db.session.commit()
