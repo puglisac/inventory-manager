@@ -24,7 +24,7 @@ app.register_blueprint(users_blueprint, url_prefix="/users")
 app.register_blueprint(items_blueprint, url_prefix="/items")
 app.register_blueprint(categories_blueprint, url_prefix="/categories")
 
-db.drop_all()
+# db.drop_all()
 db.create_all()
 
 print(os.environ.get('DATABASE_URI'))

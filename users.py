@@ -1,6 +1,6 @@
 from flask import Blueprint, request, jsonify
 from sqlalchemy.exc import IntegrityError
-from models import User, db, Item, Pull_List
+from models import User, db, Item
 from flask_jwt_extended import (
     jwt_required, create_access_token,
     get_jwt_identity
@@ -21,17 +21,17 @@ def login():
         return {"msg":"invalid login"}, 500
 
 @users_blueprint.route('/signup', methods=['POST'])
-@jwt_required
+# @jwt_required
 def signup():
     # signup a user
     
     # check JWT identity is same as email or user is an admin
-    token_user=get_jwt_identity()
-    accessing_user = User.query.get_or_404(token_user)
+    # token_user=get_jwt_identity()
+    # accessing_user = User.query.get_or_404(token_user)
 
-    # return unauthorized message if user not authorized
-    if accessing_user.is_admin==False:
-        return {'msg': 'unauthorized'}, 401
+    # # return unauthorized message if user not authorized
+    # if accessing_user.is_admin==False:
+    #     return {'msg': 'unauthorized'}, 401
 
     d=request.json
 

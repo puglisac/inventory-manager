@@ -46,9 +46,9 @@ class User(db.Model, SerializerMixin):
     
     @classmethod
     # signs up a new user
-    def signup(cls, email, password, first_name, last_name):
+    def signup(cls, email, password, first_name, last_name, is_admin):
         hashed_password = bcrypt.generate_password_hash(password).decode("utf8")
-        u=cls(email=email, password=hashed_password, first_name=first_name, last_name=last_name)
+        u=cls(email=email, password=hashed_password, first_name=first_name, last_name=last_name, is_admin=is_admin)
         return u
 
 class Item(db.Model, SerializerMixin):
@@ -74,6 +74,7 @@ class Item(db.Model, SerializerMixin):
     quantity = db.Column(db.Integer, nullable=False)
     image_path=db.Column(db.Text)
     categories = db.relationship('Category', secondary='items_categories', backref='items')
+    user_email = db.Column(db.Text, db.ForeignKey(User.email))
 
 class Category(db.Model, SerializerMixin):
     """Category."""
