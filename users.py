@@ -149,19 +149,24 @@ def add_item_to_user(email):
 @users_blueprint.route('/<email>/remove_item', methods=["PATCH"])
 @jwt_required
 def remove_item_from_user(email):
-    # remove item from user's pull list
+    # remove item from user's pull list. requires requestor to be admin
 
-    # check JWT identity is same as email
+ # check JWT identity is same as email or user is an admin
     token_user=get_jwt_identity()
+    accessing_user = User.query.get_or_404(token_user)
 
     # return unauthorized message if user not authorized
-    if email != token_user:
+    if accessing_user.is_admin==False:
         return {'msg': 'unauthorized'}, 401
-    
+    if request.json['item_id']=="all":
+        user=User.query.get_or_404(email)
+        user.pull_list=[]
+        db.session.add(user)
     # get item and delete from session
-    item_to_remove = Item.query.get_or_404(request.json['item_id'],description="item not found in pull_list")
-    item_to_remove.user_email=None
-    db.session.add(item_to_remove) 
+    else:
+        item_to_remove = Item.query.get_or_404(request.json['item_id'],description="item not found in pull_list")
+        item_to_remove.user_email=None
+        db.session.add(item_to_remove) 
     try:
         # commit to db and return updated user
         db.session.commit()
