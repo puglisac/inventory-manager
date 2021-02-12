@@ -33,7 +33,7 @@ class User(db.Model, SerializerMixin):
     first_name = db.Column(db.Text, nullable=False)
     last_name = db.Column(db.Text, nullable=False)
     is_admin = db.Column(db.Boolean, default=False)
-    pull_list = db.relationship('Item', secondary='pull_list', backref='user')
+    pull_list = db.relationship('Item', backref='user')
 
     @classmethod
     # authenticate a user
@@ -104,18 +104,4 @@ class Item_Category(db.Model):
                         nullable=False)
     category_id = db.Column(db.Integer,
                         db.ForeignKey('categories.id'), 
-                        nullable=False)
-
-class Pull_List(db.Model):
-
-    __tablename__='pull_list'
-
-    id=db.Column(db.Integer, 
-                    primary_key=True,
-                    autoincrement=True)
-    item_id = db.Column(db.Integer,
-                        db.ForeignKey('items.id'), 
-                        nullable=False)
-    user_id = db.Column(db.Text,
-                        db.ForeignKey('users.email'), 
                         nullable=False)
