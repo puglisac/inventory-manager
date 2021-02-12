@@ -132,9 +132,10 @@ def add_item_to_user(email):
     # return unauthorized message if user not authorized
     if email != token_user:
         return {'msg': 'unauthorized'}, 401
-    
+    print("*********", request.json['item_id'])
     # get item and append to pull list
-    item = Item.query.get_or_404(request.json['item_id'])
+    item = Item.query.get_or_404(request.json['item_id'], description="item not found")
+   
     user.pull_list.append(item)
     db.session.add(user)
     try: 
@@ -159,7 +160,7 @@ def remove_item_from_user(email):
     
     # get item and delete from session
     item_to_remove = Item.query.get_or_404(request.json['item_id'],description="item not found in pull_list")
-    item_to_remove['user']=None
+    item_to_remove.user_email=None
     db.session.add(item_to_remove) 
     try:
         # commit to db and return updated user

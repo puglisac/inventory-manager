@@ -27,8 +27,6 @@ app.register_blueprint(categories_blueprint, url_prefix="/categories")
 # db.drop_all()
 db.create_all()
 
-print(os.environ.get('DATABASE_URI'))
-
 @app.route('/')
 def index():
     return "in app.py"
