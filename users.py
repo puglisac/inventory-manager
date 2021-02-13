@@ -18,7 +18,7 @@ def login():
             access_token = create_access_token(identity=request.json['email'])
             return jsonify(access_token=access_token)
     except:
-        return {"msg":"invalid login"}, 500
+        return {"message":"invalid login"}, 500
 
 @users_blueprint.route('/signup', methods=['POST'])
 # @jwt_required
@@ -31,7 +31,7 @@ def signup():
 
     # # return unauthorized message if user not authorized
     # if accessing_user.is_admin==False:
-    #     return {'msg': 'unauthorized'}, 401
+    #     return {'message': 'unauthorized'}, 401
 
     d=request.json
 
@@ -49,7 +49,7 @@ def signup():
         access_token = create_access_token(identity=request.json['email'])
         return jsonify(access_token=access_token), 201
     except IntegrityError:
-        return {"msg":"email already in use"}, 500
+        return {"message":"email already in use"}, 500
 
 @users_blueprint.route('/<email>')
 @jwt_required
@@ -60,7 +60,7 @@ def get_user(email):
     token_user=get_jwt_identity()
     accessing_user = User.query.get_or_404(token_user)
     if email != accessing_user.email and accessing_user.is_admin==False:
-        return {'msg': 'unauthorized'}, 401
+        return {'message': 'unauthorized'}, 401
     # get user and return json
     u=User.query.get_or_404(email, description="user not found")
     return jsonify({"user": u.to_dict()})
@@ -76,7 +76,7 @@ def update_user(email):
 
     # return unauthorized message if user not authorized
     if email != accessing_user.email and accessing_user.is_admin==False:
-        return {'msg': 'unauthorized'}, 401
+        return {'message': 'unauthorized'}, 401
 
     # get data from request.json and update user
     d=request.json
@@ -95,7 +95,7 @@ def update_user(email):
         updated_user=User.query.get_or_404(email)
         return jsonify({'user': updated_user.to_dict()})
     except:
-        return jsonify({'msg': 'unable to edit user'}), 500
+        return jsonify({'message': 'unable to edit user'}), 500
 
 @users_blueprint.route('/<email>', methods=['DELETE'])
 @jwt_required
@@ -108,17 +108,17 @@ def delete_user(email):
 
     # return unauthorized message if user not authorized
     if email != accessing_user.email and accessing_user.is_admin==False:
-        return {'msg': 'unauthorized'}, 401
+        return {'message': 'unauthorized'}, 401
     
     # find and delete user
     user=User.query.get_or_404(email, description="user not found")
     db.session.delete(user)
     try:
-        # commit and return success msg
+        # commit and return success message
         db.session.commit()
-        return jsonify({'msg': 'user successfully deleted'})
+        return jsonify({'message': 'user successfully deleted'})
     except:
-        return jsonify({'msg': 'unable to delete user'}), 500
+        return jsonify({'message': 'unable to delete user'}), 500
 
 @users_blueprint.route('/<email>/add_item', methods=["PATCH"])
 @jwt_required
@@ -131,8 +131,8 @@ def add_item_to_user(email):
 
     # return unauthorized message if user not authorized
     if email != token_user:
-        return {'msg': 'unauthorized'}, 401
-    print("*********", request.json['item_id'])
+        return {'message': 'unauthorized'}, 401
+
     # get item and append to pull list
     item = Item.query.get_or_404(request.json['item_id'], description="item not found")
    
@@ -144,7 +144,7 @@ def add_item_to_user(email):
         updated_user = User.query.get_or_404(email)
         return jsonify({'user': updated_user.to_dict()})
     except: 
-        return {'msg': 'unable to add item'}, 500
+        return {'message': 'unable to add item'}, 500
 
 @users_blueprint.route('/<email>/remove_item', methods=["PATCH"])
 @jwt_required
@@ -157,7 +157,7 @@ def remove_item_from_user(email):
 
     # return unauthorized message if user not authorized
     if accessing_user.is_admin==False:
-        return {'msg': 'unauthorized'}, 401
+        return {'message': 'unauthorized'}, 401
     if request.json['item_id']=="all":
         user=User.query.get_or_404(email)
         user.pull_list=[]
@@ -173,4 +173,4 @@ def remove_item_from_user(email):
         updated_user = User.query.get_or_404(email)
         return jsonify({'user': updated_user.to_dict()})
     except: 
-        return {'msg':'unable to remove item'}, 500
+        return {'message':'unable to remove item'}, 500

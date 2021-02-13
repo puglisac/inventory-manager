@@ -32,7 +32,7 @@ def add_item():
     token_user=get_jwt_identity()
     accessing_user = User.query.get_or_404(token_user)
     if accessing_user.is_admin==False:
-        return {'msg': 'unauthorized'}, 401
+        return {'message': 'unauthorized'}, 401
 
     # get data from request and create new item
     d=request.json
@@ -41,15 +41,14 @@ def add_item():
     description = d['description']
     quantity = d['quantity']
     image_path = d['image_path']
-    categories_arr=[]
+    category_ids = d['categories']
     
     # add category ids to item
-    if request.json['categories']:
-        category_ids = request.json['categories'].split(",")
-        for id in category_ids:
-            category = Category.query.get_or_404(id, description="category not found")
-            categories_arr.append(category)
-
+    categories_arr=[]
+    for id in category_ids:
+        category = Category.query.get_or_404(id, description="category not found")
+        categories_arr.append(category)
+    
     item=Item(name=name, 
                 location=location, 
                 description=description, 
@@ -63,7 +62,7 @@ def add_item():
         db.session.commit()
         return jsonify({"item": item.to_dict()}), 201
     except: 
-        return {'msg':'unable to add item'}, 500
+        return {'message':'unable to add item'}, 500
 
 @items_blueprint.route('/<int:item_id>')
 @jwt_required
@@ -81,7 +80,7 @@ def update_item(item_id):
     token_user=get_jwt_identity()
     accessing_user = User.query.get_or_404(token_user)
     if accessing_user.is_admin==False:
-        return {'msg': 'unauthorized'}, 401
+        return {'message': 'unauthorized'}, 401
 
     # get data from request and update item
     d=request.json
@@ -92,12 +91,12 @@ def update_item(item_id):
             setattr(item, update, d[update])
 
     # update category ids
-    if request.json['categories']:
+        category_ids = request.json['categories']
         categories_arr=[]
-        category_ids = request.json['categories'].split(",")
         for id in category_ids:
             category = Category.query.get_or_404(id, description="category not found")
             categories_arr.append(category)
+            
         item.categories=categories_arr
     
     db.session.add(item)
@@ -107,7 +106,7 @@ def update_item(item_id):
         updated_item=Item.query.get_or_404(item_id)
         return jsonify({'item': updated_item.to_dict()})
     except:
-        return jsonify({'msg': 'unable to edit item'}), 500
+        return jsonify({'message': 'unable to edit item'}), 500
 
 @items_blueprint.route('/<int:item_id>', methods=['DELETE'])
 @jwt_required
@@ -118,7 +117,7 @@ def delete_item(item_id):
     token_user=get_jwt_identity()
     accessing_user = User.query.get_or_404(token_user)
     if accessing_user.is_admin==False:
-        return {'msg': 'unauthorized'}, 401
+        return {'message': 'unauthorized'}, 401
 
     # get item and delete
     item=Item.query.get_or_404(item_id)
@@ -126,9 +125,9 @@ def delete_item(item_id):
     try:
         # commit to db and return success message
         db.session.commit()
-        return jsonify({'msg': 'item successfully deleted'})
+        return jsonify({'message': 'item successfully deleted'})
     except:
-        return jsonify({'msg': 'unable to delete item'}), 500
+        return jsonify({'message': 'unable to delete item'}), 500
 
 @items_blueprint.route('/<int:item_id>/add_category', methods=["PATCH"])
 @jwt_required
@@ -140,7 +139,7 @@ def add_category_to_item(item_id):
     token_user=get_jwt_identity()
     accessing_user = User.query.get_or_404(token_user)
     if accessing_user.is_admin==False:
-        return {'msg': 'unauthorized'}, 401
+        return {'message': 'unauthorized'}, 401
 
     # get item and categories and set array of categories to items.categories
     item=Item.query.get_or_404(item_id, description="item not found")
@@ -160,7 +159,7 @@ def add_category_to_item(item_id):
         updated_item = Item.query.get_or_404(item_id)
         return jsonify({'item': updated_item.to_dict()})
     except: 
-        return {'msg': 'unable to add item'}, 500
+        return {'message': 'unable to add item'}, 500
 
 @items_blueprint.route('/<int:item_id>/remove_category', methods=["DELETE"])
 @jwt_required
@@ -171,7 +170,7 @@ def remove_category_from_item(item_id):
     token_user=get_jwt_identity()
     accessing_user = User.query.get_or_404(token_user)
     if accessing_user.is_admin==False:
-        return {'msg': 'unauthorized'}, 401
+        return {'message': 'unauthorized'}, 401
 
     # remove relationship
     category_to_remove = Item_Category.query.filter(Item_Category.item_id==item_id, Item_Category.category_id==request.json['category_id']).first_or_404(description="category not assigned to item")
@@ -182,4 +181,4 @@ def remove_category_from_item(item_id):
         updated_item = Item.query.get_or_404(item_id)
         return jsonify({'item': updated_item.to_dict()})
     except: 
-        return {'msg':'unable to remove category'}, 500
+        return {'message':'unable to remove category'}, 500

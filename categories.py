@@ -25,7 +25,7 @@ def add_category():
     token_user=get_jwt_identity()
     accessing_user = User.query.get_or_404(token_user)
     if accessing_user.is_admin==False:
-        return {'msg': 'unauthorized'}, 401
+        return {'message': 'unauthorized'}, 401
 
     # get data from request and create new category
     d=request.json
@@ -38,7 +38,7 @@ def add_category():
         db.session.commit()
         return jsonify({"category": new_category.to_dict()}), 201
     except: 
-        return {'msg':'unable to add category'}, 500
+        return {'message':'unable to add category'}, 500
 
 @categories_blueprint.route('/<int:category_id>')
 @jwt_required
@@ -56,7 +56,7 @@ def update_category(category_id):
     token_user=get_jwt_identity()
     accessing_user = User.query.get_or_404(token_user)
     if accessing_user.is_admin==False:
-        return {'msg': 'unauthorized'}, 401
+        return {'message': 'unauthorized'}, 401
 
     # get data form request and update the category
     d=request.json
@@ -72,7 +72,7 @@ def update_category(category_id):
         updated_category=Category.query.get_or_404(category_id, description = "category not found")
         return jsonify({'item': updated_category.to_dict()})
     except:
-        return jsonify({'msg': 'unable to edit category'}), 500
+        return jsonify({'message': 'unable to edit category'}), 500
 
 @categories_blueprint.route('/<int:category_id>', methods=['DELETE'])
 @jwt_required
@@ -83,15 +83,15 @@ def delete_category(category_id):
     token_user=get_jwt_identity()
     accessing_user = User.query.get_or_404(token_user)
     if accessing_user.is_admin==False:
-        return {'msg': 'unauthorized'}, 401
+        return {'message': 'unauthorized'}, 401
 
     # get category and delete
     category=Category.query.get_or_404(category_id, description = "category not found")
     db.session.delete(category)
     try:
-        # commit to db and return success msg
+        # commit to db and return success message
         db.session.commit()
-        return jsonify({'msg': 'category successfully deleted'})
+        return jsonify({'message': 'category successfully deleted'})
     except:
-        return jsonify({'msg': 'unable to delete category'}), 500
+        return jsonify({'message': 'unable to delete category'}), 500
 
