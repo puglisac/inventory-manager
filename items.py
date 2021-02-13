@@ -41,11 +41,22 @@ def add_item():
     description = d['description']
     quantity = d['quantity']
     image_path = d['image_path']
+    categories_arr=[]
+    
+    # add category ids to item
+    if request.json['categories']:
+        category_ids = request.json['categories'].split(",")
+        for id in category_ids:
+            category = Category.query.get_or_404(id, description="category not found")
+            categories_arr.append(category)
+
     item=Item(name=name, 
                 location=location, 
                 description=description, 
                 quantity=quantity, 
-                image_path=image_path)
+                image_path=image_path,
+                categories=categories_arr)
+
     db.session.add(item)
     try: 
         # commit to db and return new item
@@ -77,8 +88,18 @@ def update_item(item_id):
     item=Item.query.get_or_404(item_id, description = "item not found")
     for update in d:
         # don't update id
-        if update != 'id':
+        if update != 'id' and update != 'categories':
             setattr(item, update, d[update])
+
+    # update category ids
+    if request.json['categories']:
+        categories_arr=[]
+        category_ids = request.json['categories'].split(",")
+        for id in category_ids:
+            category = Category.query.get_or_404(id, description="category not found")
+            categories_arr.append(category)
+        item.categories=categories_arr
+    
     db.session.add(item)
     try: 
         # commit to db and return updated item
