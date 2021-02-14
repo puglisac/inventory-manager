@@ -25,8 +25,10 @@ class User(db.Model, SerializerMixin):
 # rules to exclude password and backref from serialization
     serialize_rules = ('-pull_list.user','-password')
 
-    email = db.Column(db.Text,
+    id=db.Column(db.Integer, 
                       primary_key=True,
+                      autoincrement=True)
+    email = db.Column(db.Text,
                       nullable=False,
                       unique=True)
     password = db.Column(db.Text, nullable=False)
@@ -38,7 +40,7 @@ class User(db.Model, SerializerMixin):
     @classmethod
     # authenticate a user
     def authenticate(cls, email, password):
-        u=User.query.get_or_404(email)
+        u=User.query.filter_by(email=email).first_or_404()
         if u and bcrypt.check_password_hash(u.password, password):
             return u
         else: 
@@ -50,6 +52,11 @@ class User(db.Model, SerializerMixin):
         hashed_password = bcrypt.generate_password_hash(password).decode("utf8")
         u=cls(email=email, password=hashed_password, first_name=first_name, last_name=last_name, is_admin=is_admin)
         return u
+    
+    def changePassword(self, newPassword):
+        hashed_password = bcrypt.generate_password_hash(newPassword).decode("utf8")
+        self.password=hashed_password
+        return self
 
 class Item(db.Model, SerializerMixin):
     """Item."""
@@ -74,7 +81,7 @@ class Item(db.Model, SerializerMixin):
     quantity = db.Column(db.Integer, nullable=False)
     image_path=db.Column(db.Text)
     categories = db.relationship('Category', secondary='items_categories', backref='items')
-    user_email = db.Column(db.Text, db.ForeignKey(User.email))
+    user_id = db.Column(db.Integer, db.ForeignKey(User.id))
 
 class Category(db.Model, SerializerMixin):
     """Category."""

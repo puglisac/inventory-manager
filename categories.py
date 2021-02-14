@@ -23,7 +23,7 @@ def add_category():
 
     # check JWT identity and return unauthorized message if user not authorized
     token_user=get_jwt_identity()
-    accessing_user = User.query.get_or_404(token_user)
+    accessing_user = User.query.filter_by(email=token_user).first_or_404()
     if accessing_user.is_admin==False:
         return {'message': 'unauthorized'}, 401
 
@@ -54,7 +54,7 @@ def update_category(category_id):
 
     # check JWT identity and return unauthorized message if user not authorized
     token_user=get_jwt_identity()
-    accessing_user = User.query.get_or_404(token_user)
+    accessing_user = User.query.filter_by(email=token_user).first_or_404()
     if accessing_user.is_admin==False:
         return {'message': 'unauthorized'}, 401
 
@@ -70,7 +70,7 @@ def update_category(category_id):
         # commit to the db and return updated category 
         db.session.commit()
         updated_category=Category.query.get_or_404(category_id, description = "category not found")
-        return jsonify({'item': updated_category.to_dict()})
+        return jsonify({'category': updated_category.to_dict()})
     except:
         return jsonify({'message': 'unable to edit category'}), 500
 
@@ -81,7 +81,7 @@ def delete_category(category_id):
 
     # check JWT identity and return unauthorized message if user not authorized
     token_user=get_jwt_identity()
-    accessing_user = User.query.get_or_404(token_user)
+    accessing_user = User.query.filter_by(email=token_user).first_or_404()
     if accessing_user.is_admin==False:
         return {'message': 'unauthorized'}, 401
 

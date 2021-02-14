@@ -30,7 +30,7 @@ def add_item():
 
     # check JWT identity and return unauthorized message if user not authorized
     token_user=get_jwt_identity()
-    accessing_user = User.query.get_or_404(token_user)
+    accessing_user = User.query.filter_by(email=token_user).first_or_404()
     if accessing_user.is_admin==False:
         return {'message': 'unauthorized'}, 401
 
@@ -78,7 +78,7 @@ def update_item(item_id):
 
     # check JWT identity and return unauthorized message if user not authorized
     token_user=get_jwt_identity()
-    accessing_user = User.query.get_or_404(token_user)
+    accessing_user = User.query.filter_by(email=token_user).first_or_404()
     if accessing_user.is_admin==False:
         return {'message': 'unauthorized'}, 401
 
@@ -115,7 +115,7 @@ def delete_item(item_id):
 
     # check JWT identity and return unauthorized message if user not authorized
     token_user=get_jwt_identity()
-    accessing_user = User.query.get_or_404(token_user)
+    accessing_user = User.query.filter_by(email=token_user).first_or_404()
     if accessing_user.is_admin==False:
         return {'message': 'unauthorized'}, 401
 
@@ -137,7 +137,7 @@ def add_category_to_item(item_id):
 
     # check JWT identity and return unauthorized message if user not authorized
     token_user=get_jwt_identity()
-    accessing_user = User.query.get_or_404(token_user)
+    accessing_user = User.query.filter_by(email=token_user).first_or_404()
     if accessing_user.is_admin==False:
         return {'message': 'unauthorized'}, 401
 
@@ -168,7 +168,7 @@ def remove_category_from_item(item_id):
 
     # check JWT identity and return unauthorized message if user not authorized
     token_user=get_jwt_identity()
-    accessing_user = User.query.get_or_404(token_user)
+    accessing_user = User.query.filter_by(email=token_user).first_or_404()
     if accessing_user.is_admin==False:
         return {'message': 'unauthorized'}, 401
 
