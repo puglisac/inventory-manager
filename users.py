@@ -58,11 +58,11 @@ def get_user(email):
 
     # check JWT identity is same as email or user is an admin
     token_user=get_jwt_identity()
-    accessing_user = User.query.filter_by(email=token_user).first_or_404()
+    accessing_user = User.query.filter_by(email=token_user).first_or_404(description = "user not found")
     if email != accessing_user.email and accessing_user.is_admin==False:
         return {'message': 'unauthorized'}, 401
     # get user and return json
-    u=User.query.filter_by(email=email).first_or_404()
+    u=User.query.filter_by(email=email).first_or_404(description = "user not found")
     return jsonify({"user": u.to_dict()})
 
 @users_blueprint.route('/<email>', methods=['PATCH'])
@@ -72,7 +72,7 @@ def update_user(email):
 
     # check JWT identity is same as email or user is an admin
     token_user=get_jwt_identity()
-    accessing_user = User.query.filter_by(email=token_user).first_or_404()
+    accessing_user = User.query.filter_by(email=token_user).first_or_404(description = "user not found")
 
     # return unauthorized message if user not authorized
     if email != accessing_user.email and accessing_user.is_admin==False:
@@ -80,7 +80,7 @@ def update_user(email):
 
     # get data from request.json and update user
     d=request.json
-    user=User.query.filter_by(email=email).first_or_404()
+    user=User.query.filter_by(email=email).first_or_404(description = "user not found")
     for update in d:
         # don't update id and only update is_admin if accessing_user is admin
         if update != 'id' and update != 'password':
@@ -94,7 +94,7 @@ def update_user(email):
     try: 
         # commit to database and return updated user
         db.session.commit()
-        updated_user=User.query.get_or_404(user.id)
+        updated_user=User.query.get_or_404(user.id, description = "user not found")
         return jsonify({'user': updated_user.to_dict()})
     except IntegrityError:
         return jsonify({'message': 'Email already in use'}), 500
@@ -106,20 +106,19 @@ def update_user(email):
 def changePassword(email):
     # check JWT identity is same as email or user is an admin
     token_user=get_jwt_identity()
-    accessing_user = User.query.filter_by(email=token_user).first_or_404()
+    accessing_user = User.query.filter_by(email=token_user).first_or_404(description = "user not found")
 
     # return unauthorized message if user not authorized
     if email != accessing_user.email:
         return {'message': 'unauthorized'}, 401
-    user=User.query.filter_by(email=email).first_or_404()
     existing_password=request.json['existing_password']
     new_password=request.json['new_password']
     if User.authenticate(email, existing_password):
-        user.changePassword(new_password)
-        db.session.add(user)
+        accessing_user.changePassword(new_password)
+        db.session.add(accessing_user)
         try:
             db.session.commit()
-            updated_user=User.query.get_or_404(user.id)
+            updated_user=User.query.get_or_404(accessing_user.id, description = "user not found")
             return updated_user
         except:
             return jsonify({'message': 'unable to change password'}), 500
@@ -135,14 +134,14 @@ def delete_user(email):
 
     # check JWT identity is same as email or user is an admin
     token_user=get_jwt_identity()
-    accessing_user = User.query.filter_by(email=token_user).first_or_404()
+    accessing_user = User.query.filter_by(email=token_user).first_or_404(description = "user not found")
 
     # return unauthorized message if user not authorized
     if email != accessing_user.email and accessing_user.is_admin==False:
         return {'message': 'unauthorized'}, 401
     
     # find and delete user
-    user=User.query.filter_by(email=email).first_or_404()
+    user=User.query.filter_by(email=email).first_or_404(description = "user not found")
     db.session.delete(user)
     try:
         # commit and return success message
@@ -157,7 +156,7 @@ def add_item_to_user(email):
     # add an item to a user's pull list
 
     # check JWT identity is same as email
-    user=User.query.filter_by(email=email).first_or_404()
+    user=User.query.filter_by(email=email).first_or_404(description = "user not found")
     token_user=get_jwt_identity()
 
     # return unauthorized message if user not authorized
@@ -172,7 +171,7 @@ def add_item_to_user(email):
     try: 
         # commit to db and return updated user
         db.session.commit()
-        updated_user = User.query.filter_by(email=email).first_or_404()
+        updated_user = User.query.filter_by(email=email).first_or_404(description = "user not found")
         return jsonify({'user': updated_user.to_dict()})
     except: 
         return {'message': 'unable to add item'}, 500
@@ -184,13 +183,13 @@ def remove_item_from_user(email):
 
  # check JWT identity is same as email or user is an admin
     token_user=get_jwt_identity()
-    accessing_user = User.query.filter_by(email=token_user).first_or_404()
+    accessing_user = User.query.filter_by(email=token_user).first_or_404(description = "user not found")
 
     # return unauthorized message if user not authorized
     if accessing_user.is_admin==False:
         return {'message': 'unauthorized'}, 401
     if request.json['item_id']=="all":
-        user=User.query.filter_by(email=email).first_or_404()
+        user=User.query.filter_by(email=email).first_or_404(description = "user not found")
         user.pull_list=[]
         db.session.add(user)
     # get item and delete from session
@@ -201,7 +200,7 @@ def remove_item_from_user(email):
     try:
         # commit to db and return updated user
         db.session.commit()
-        updated_user = User.query.filter_by(email=email).first_or_404()
+        updated_user = User.query.filter_by(email=email).first_or_404(description = "user not found")
         return jsonify({'user': updated_user.to_dict()})
     except: 
         return {'message':'unable to remove item'}, 500
