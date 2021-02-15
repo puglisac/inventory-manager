@@ -46,10 +46,25 @@ def signup():
     try:
         # commit new user and return JWT
         db.session.commit()
-        access_token = create_access_token(identity=request.json['email'])
-        return jsonify(access_token=access_token), 201
+        new_user=User.query.filter_by(email=email).first_or_404(description="user not found")
+        return jsonify({"user": new_user.to_dict()}), 201
     except IntegrityError:
         return {"message":"email already in use"}, 500
+
+@users_blueprint.route('/')
+@jwt_required
+def get_all_users():
+    # get all users
+
+    # check JWT identity is same as email or user is an admin
+    token_user=get_jwt_identity()
+    accessing_user = User.query.filter_by(email=token_user).first_or_404(description = "user not found")
+    if accessing_user.is_admin==False:
+        return {'message': 'unauthorized'}, 401
+    # get user and return json
+    users=User.query.all()
+    serialized_users=[u.to_dict() for u in users]
+    return jsonify({"users": serialized_users})
 
 @users_blueprint.route('/<email>')
 @jwt_required
