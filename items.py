@@ -91,6 +91,7 @@ def update_item(item_id):
             setattr(item, update, d[update])
 
     # update category ids
+    if(request.json['categories']):
         category_ids = request.json['categories']
         categories_arr=[]
         for id in category_ids:
