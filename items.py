@@ -132,7 +132,7 @@ def delete_item(item_id):
 @items_blueprint.route('/<int:item_id>/add_category', methods=["PATCH"])
 @jwt_required
 def add_category_to_item(item_id):
-    # updates an item's category tags. requires user to be admin
+    # adds category tag to item. requires user to be admin
     
 
     # check JWT identity and return unauthorized message if user not authorized
