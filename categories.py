@@ -60,7 +60,7 @@ def update_category(category_id):
 
     # get data form request and update the category
     d=request.json
-    category=Category.query.get_or_404(category_id)
+    category=Category.query.get_or_404(category_id, description="category not found")
     for update in d:
         # don't update the id
         if update != 'id':

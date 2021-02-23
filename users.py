@@ -134,7 +134,7 @@ def changePassword(email):
         try:
             db.session.commit()
             updated_user=User.query.get_or_404(accessing_user.id, description = "user not found")
-            return updated_user
+            return jsonify({'user': updated_user.to_dict()})
         except:
             return jsonify({'message': 'unable to change password'}), 500
     else:
