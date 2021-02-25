@@ -17,6 +17,8 @@ def login():
         if User.authenticate(request.json['email'], request.json['password']):
             access_token = create_access_token(identity=request.json['email'])
             return jsonify(access_token=access_token)
+        else:
+            return {"message":"invalid email or password"}, 401
     except:
         return {"message":"invalid login"}, 500
 
