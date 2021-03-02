@@ -20,7 +20,6 @@ Via command line:
 $ git clone https://github.com/puglisac/inventory_manager.git
 ```
 
-
 Backend Environment Setup:
 1. In the directory you've cloned or downloaded the repo to, create the virtual environment and activate it
 
