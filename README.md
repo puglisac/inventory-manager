@@ -39,7 +39,6 @@ $ source venv/bin/activate
 ```
 $ createdb inventory_manager
 ```
-5. Head over to [N2YO](https://www.n2yo.com/login/) and register for an account
 
 7. Start up the Flask server
 ```
