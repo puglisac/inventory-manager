@@ -25,7 +25,7 @@ def login():
 @users_blueprint.route('/signup', methods=['POST'])
 @jwt_required
 def signup():
-    # signup a user
+    # signup a user requires user to be admin
     
     # check JWT identity is same as email or user is an admin
     token_user=get_jwt_identity()
