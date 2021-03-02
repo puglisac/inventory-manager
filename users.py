@@ -23,17 +23,17 @@ def login():
         return {"message":"invalid login"}, 500
 
 @users_blueprint.route('/signup', methods=['POST'])
-# @jwt_required
+@jwt_required
 def signup():
-    # signup a user
+    # signup a user requires user to be admin
     
     # check JWT identity is same as email or user is an admin
-    # token_user=get_jwt_identity()
-    # accessing_user = User.query.get_or_404(token_user)
+    token_user=get_jwt_identity()
+    accessing_user = User.query.filter_by(email=token_user).first_or_404(description = "user not found")
 
     # # return unauthorized message if user not authorized
-    # if accessing_user.is_admin==False:
-    #     return {'message': 'unauthorized'}, 401
+    if accessing_user.is_admin==False:
+        return {'message': 'unauthorized'}, 401
 
     d=request.json
 
