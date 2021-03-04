@@ -15,22 +15,7 @@ connect_db(app)
 db.create_all()
 
 class TestUsersRoutes(TestCase):
-    # def setUp(self):
-        # User.query.delete()
-        # self.admin_test_user=User.signup(
-        #                     email="admin_test@email.com",
-        #                     password="password",
-        #                     first_name="First",
-        #                     last_name="Last",
-        #                     is_admin=True
-        # )
-        # self.test_user=User.signup(
-        #                     email="test@email.com",
-        #                     password="anotherPassword",
-        #                     first_name="First",
-        #                     last_name="Last",
-        #                     is_admin=False
-        # )
+
     @classmethod
     def setUpClass(cls):
         """ get_some_resource() is slow, to avoid calling it for eachtest  use setUpClass()
