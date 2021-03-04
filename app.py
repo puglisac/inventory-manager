@@ -6,6 +6,7 @@ from categories import categories_blueprint
 from models import db, connect_db
 from flask_jwt_extended import JWTManager, create_access_token
 import os
+from datetime import timedelta
 
 app = Flask(__name__)
 CORS(app)
@@ -16,7 +17,7 @@ app.config['SQLALCHEMY_ECHO'] = True
 app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY')
 app.config['DEBUG_TB_INTERCEPT_REDIRECTS'] = False
 app.config['JWT_SECRET_KEY'] = os.environ.get('JWT_SECRET_KEY')
-app.config['JWT_ACCESS_TOKEN_EXPIRES'] = False
+app.config['JWT_ACCESS_TOKEN_EXPIRES'] = timedelta(days=1)
 jwt = JWTManager(app)
 
 connect_db(app)
