@@ -58,7 +58,7 @@ def signup():
 def get_all_users():
     # get all users
 
-    # check JWT identity is same as email or user is an admin
+    # check JWT identity is same as email
     token_user=get_jwt_identity()
     accessing_user = User.query.filter_by(email=token_user).first_or_404(description = "user not found")
     if accessing_user.is_admin==False:

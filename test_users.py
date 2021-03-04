@@ -58,12 +58,11 @@ class TestUsersRoutes(TestCase):
         cls.token = None
         with app.test_client() as client:
             resp = client.post("/users/login", json=   {"email":"admin_test@email.com", "password": "password"})
-            print("******", resp.json['access_token'])
             cls.admin_token = resp.json['access_token']
 
-        # with app.test_client() as client:
-        #     resp = client.post("/users/login", json={"email":"test@email.   com", "password": "anotherPassword"})
-        #     cls.token = resp.json['access_token']
+        with app.test_client() as client:
+            resp = client.post("/users/login", json={"email":"test@email.com", "password": "anotherPassword"})
+            cls.token = resp.json['access_token']
 
     def test_login(self):
         with app.test_client() as client:
@@ -86,3 +85,39 @@ class TestUsersRoutes(TestCase):
                                                 "is_admin": False
                                                 }, headers={ 'Authorization': f'Bearer {TestUsersRoutes.admin_token}'})
             self.assertEqual(resp.status_code, 201)
+
+    def test_invalid_signup(self):
+        with app.test_client() as client:
+            resp = client.post("/users/signup", json={
+                                                "first_name":"New",
+                                                "last_name":"User",
+                                                "password":"password", 
+                                                "email": "another@email.com", 
+                                                "is_admin": False
+                                                }, headers={ 'Authorization': f'Bearer {TestUsersRoutes.token}'})
+            self.assertEqual(resp.status_code, 401)
+    
+    def test_get_all_users(self):
+        with app.test_client() as client:
+            resp = client.get("/users/", headers={ 'Authorization': f'Bearer {TestUsersRoutes.admin_token}'})
+            self.assertEqual(resp.status_code, 200)
+
+    def test_invalid_get_all_users(self):
+        with app.test_client() as client:
+            resp = client.get("/users/", headers={ 'Authorization': f'Bearer {TestUsersRoutes.token}'})
+            self.assertEqual(resp.status_code, 401)
+
+    def test_get_one_user(self):
+        with app.test_client() as client:
+            resp = client.get("/users/test@email.com", headers={ 'Authorization': f'Bearer {TestUsersRoutes.admin_token}'})
+            self.assertEqual(resp.status_code, 200)
+
+    def test_invalid_get_one_users(self):
+        with app.test_client() as client:
+            resp = client.get("/users/admin_test@email.com", headers={ 'Authorization': f'Bearer {TestUsersRoutes.token}'})
+            self.assertEqual(resp.status_code, 401)
+    
+    def test_get_self(self):
+        with app.test_client() as client:
+            resp = client.get("/users/test@email.com", headers={ 'Authorization': f'Bearer {TestUsersRoutes.token}'})
+            self.assertEqual(resp.status_code, 200)
