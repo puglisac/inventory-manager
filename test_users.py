@@ -15,7 +15,7 @@ connect_db(app)
 db.create_all()
 
 class TestUsersRoutes(TestCase):
-
+    
     @classmethod
     def setUpClass(cls):
         """ get_some_resource() is slow, to avoid calling it for eachtest  use setUpClass()
@@ -37,7 +37,14 @@ class TestUsersRoutes(TestCase):
                             last_name="Last",
                             is_admin=False
         )
-        db.session.add_all([cls.admin_test_user, cls.test_user])
+        cls.editing_user=User.signup(    
+                        email="email@email.com",
+                        password="anotherPassword",
+                        first_name="firstName",
+                        last_name="lastName",
+                        is_admin=False
+        )
+        db.session.add_all([cls.admin_test_user, cls.test_user, cls.editing_user])
         db.session.commit()
         cls.admin_token = None
         cls.token = None
@@ -48,6 +55,7 @@ class TestUsersRoutes(TestCase):
         with app.test_client() as client:
             resp = client.post("/users/login", json={"email":"test@email.com", "password": "anotherPassword"})
             cls.token = resp.json['access_token']
+
 
     def test_login(self):
         with app.test_client() as client:
@@ -97,7 +105,7 @@ class TestUsersRoutes(TestCase):
             resp = client.get("/users/test@email.com", headers={ 'Authorization': f'Bearer {TestUsersRoutes.admin_token}'})
             self.assertEqual(resp.status_code, 200)
 
-    def test_invalid_get_one_users(self):
+    def test_unauth_get_one_users(self):
         with app.test_client() as client:
             resp = client.get("/users/admin_test@email.com", headers={ 'Authorization': f'Bearer {TestUsersRoutes.token}'})
             self.assertEqual(resp.status_code, 401)
@@ -106,3 +114,17 @@ class TestUsersRoutes(TestCase):
         with app.test_client() as client:
             resp = client.get("/users/test@email.com", headers={ 'Authorization': f'Bearer {TestUsersRoutes.token}'})
             self.assertEqual(resp.status_code, 200)
+            self.assertEqual(resp.json['user']['email'], 'test@email.com')
+
+    def test_unauth_edit_user(self):
+        with app.test_client() as client:
+            resp = client.patch("/users/email@email.com", headers={ 'Authorization': f'Bearer {TestUsersRoutes.token}'}, 
+            json={'email': 'new_test@email.com'})
+            self.assertEqual(resp.status_code, 401)
+
+    def test_edit_user_as_admin(self):
+        with app.test_client() as client:
+            resp = client.patch("/users/email@email.com", headers={ 'Authorization': f'Bearer {TestUsersRoutes.admin_token}'}, 
+            json={'email': 'new_test@email.com'})
+            self.assertEqual(resp.status_code, 200)
+            self.assertEqual(resp.json['user']['email'], 'new_test@email.com')
