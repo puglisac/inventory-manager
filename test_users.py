@@ -130,3 +130,16 @@ class TestUsersRoutes(TestCase):
             json={'first_name': 'newerName'})
             self.assertEqual(resp.status_code, 200)
             self.assertEqual(resp.json['user']['first_name'], 'newerName')
+
+    def test_change_pwd(self):
+        with app.test_client() as client:
+            resp = client.patch("/users/test@email.com/change_password", headers={ 'Authorization': f'Bearer {TestUsersRoutes.token}'}, 
+            json={'existing_password': 'anotherPassword', 'new_password':'newPassowrd'})
+            self.assertEqual(resp.status_code, 200)
+            self.assertEqual(resp.json['user']['email'], 'test@email.com')
+
+    def test_unauth_change_pwd(self):
+        with app.test_client() as client:
+            resp = client.patch("/users/test@email.com/change_password", headers={ 'Authorization': f'Bearer {TestUsersRoutes.admin_token}'}, 
+            json={'existing_password': 'anotherPassword', 'new_password':'newPassowrd'})
+            self.assertEqual(resp.status_code, 401)
