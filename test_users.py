@@ -37,14 +37,8 @@ class TestUsersRoutes(TestCase):
                             last_name="Last",
                             is_admin=False
         )
-        cls.editing_user=User.signup(    
-                        email="email@email.com",
-                        password="anotherPassword",
-                        first_name="firstName",
-                        last_name="lastName",
-                        is_admin=False
-        )
-        db.session.add_all([cls.admin_test_user, cls.test_user, cls.editing_user])
+
+        db.session.add_all([cls.admin_test_user, cls.test_user])
         db.session.commit()
         cls.admin_token = None
         cls.token = None
@@ -118,13 +112,21 @@ class TestUsersRoutes(TestCase):
 
     def test_unauth_edit_user(self):
         with app.test_client() as client:
-            resp = client.patch("/users/email@email.com", headers={ 'Authorization': f'Bearer {TestUsersRoutes.token}'}, 
-            json={'email': 'new_test@email.com'})
+            resp = client.patch("/users/admin_test@email.com", headers={ 'Authorization': f'Bearer {TestUsersRoutes.token}'}, 
+            json={'first_name': 'newName'})
             self.assertEqual(resp.status_code, 401)
 
     def test_edit_user_as_admin(self):
         with app.test_client() as client:
-            resp = client.patch("/users/email@email.com", headers={ 'Authorization': f'Bearer {TestUsersRoutes.admin_token}'}, 
-            json={'email': 'new_test@email.com'})
+            resp = client.patch("/users/test@email.com", headers={ 'Authorization': f'Bearer {TestUsersRoutes.admin_token}'}, 
+            json={'first_name': 'newName'})
             self.assertEqual(resp.status_code, 200)
-            self.assertEqual(resp.json['user']['email'], 'new_test@email.com')
+            self.assertEqual(resp.json['user']['first_name'], 'newName')
+    
+    def test_self_edit_user(self):
+        with app.test_client() as client:
+
+            resp = client.patch("/users/test@email.com", headers={ 'Authorization': f'Bearer {TestUsersRoutes.token}'}, 
+            json={'first_name': 'newerName'})
+            self.assertEqual(resp.status_code, 200)
+            self.assertEqual(resp.json['user']['first_name'], 'newerName')
