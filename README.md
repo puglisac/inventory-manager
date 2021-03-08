@@ -45,3 +45,14 @@ $ createdb inventory_manager
 (venv)$ flask run
 ```
 8. Navigate your preferred browser (Chrome suggested) to http://127.0.0.1:5000/
+
+## Running Tests:
+
+Via command line:
+```
+$ python3 -m unittest
+```
+
+## Insomnia:
+
+To see examples of requests and responses with [Insomnia](https://insomnia.rest/), import Insomnia.json.
