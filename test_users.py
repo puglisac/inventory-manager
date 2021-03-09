@@ -150,3 +150,44 @@ class TestUsersRoutes(TestCase):
             json={'existing_password': 'Password', 'new_password':'newPassowrd'})
             self.assertEqual(resp.status_code, 400)
             self.assertEqual(resp.json['message'], "incorrect password")
+    
+    def test_delete_user_as_admin(self):
+        u=User.signup(  email="to_delete@email.com",
+                        password="password",
+                        first_name="First",
+                        last_name="Last",
+                        is_admin=False)
+        db.session.add(u)
+        db.session.commit()
+        with app.test_client() as client:
+            resp = client.delete("/users/to_delete@email.com", headers={ 'Authorization': f'Bearer {TestUsersRoutes.admin_token}'})
+            self.assertEqual(resp.status_code, 200)
+            self.assertEqual(resp.json['message'], "user successfully deleted")
+
+    def test_unauth_delete_user(self):
+        u=User.signup(  email="to_delete@email.com",
+                        password="password",
+                        first_name="First",
+                        last_name="Last",
+                        is_admin=False)
+        db.session.add(u)
+        db.session.commit()
+        with app.test_client() as client:
+            resp = client.delete("/users/to_delete@email.com", headers={ 'Authorization': f'Bearer {TestUsersRoutes.token}'})
+            self.assertEqual(resp.status_code, 401)
+            self.assertEqual(resp.json['message'], "unauthorized")
+
+    def test_delete_user_as_self(self):
+        u=User.signup(  email="to_delete@email.com",
+                        password="password",
+                        first_name="First",
+                        last_name="Last",
+                        is_admin=False)
+        db.session.add(u)
+        db.session.commit()
+        with app.test_client() as client:
+            token_resp=client.post("/users/login", json={"email":"to_delete@email.com", "password": "password"})
+            token=token_resp.json['access_token']
+            resp = client.delete("/users/to_delete@email.com", headers={ 'Authorization': f'Bearer {token}'})
+            self.assertEqual(resp.status_code, 200)
+            self.assertEqual(resp.json['message'], "user successfully deleted")
