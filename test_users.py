@@ -1,6 +1,6 @@
 from unittest import TestCase
 from app import app
-from models import db, connect_db, User
+from models import db, connect_db, User, Item
 from flask import jsonify
 import os
 
@@ -23,6 +23,7 @@ class TestUsersRoutes(TestCase):
         """
         super(TestUsersRoutes, cls).setUpClass()
         User.query.delete()
+        Item.query.delete()
         cls.admin_test_user=User.signup(
                             email="admin_test@email.com",
                             password="password",
@@ -37,9 +38,14 @@ class TestUsersRoutes(TestCase):
                             last_name="Last",
                             is_admin=False
         )
+        cls.test_item=Item(name="Item name",
+                            location="a place", 
+                            description="this describes the item", 
+                            quantity=2)
 
-        db.session.add_all([cls.admin_test_user, cls.test_user])
+        db.session.add_all([cls.admin_test_user, cls.test_user, cls.test_item])
         db.session.commit()
+        cls.test_item_id=cls.test_item.id
         cls.admin_token = None
         cls.token = None
         with app.test_client() as client:
@@ -191,3 +197,21 @@ class TestUsersRoutes(TestCase):
             resp = client.delete("/users/to_delete@email.com", headers={ 'Authorization': f'Bearer {token}'})
             self.assertEqual(resp.status_code, 200)
             self.assertEqual(resp.json['message'], "user successfully deleted")
+
+    def test_add_item_to_user(self):
+        with app.test_client() as client:
+            resp = client.patch("/users/test@email.com/add_item", headers={ 'Authorization': f'Bearer {TestUsersRoutes.token}'},
+            json={'item_id': TestUsersRoutes.test_item_id})
+            self.assertEqual(resp.status_code, 200)
+
+    def test_remove_item_from_user(self):
+        with app.test_client() as client:
+            resp = client.patch("/users/test@email.com/remove_item", headers={ 'Authorization': f'Bearer {TestUsersRoutes.admin_token}'},
+            json={'item_id': TestUsersRoutes.test_item_id})
+            self.assertEqual(resp.status_code, 200)
+
+    def test_unauth_remove_item_from_user(self):
+        with app.test_client() as client:
+            resp = client.patch("/users/test@email.com/remove_item", headers={ 'Authorization': f'Bearer {TestUsersRoutes.token}'},
+            json={'item_id': TestUsersRoutes.test_item_id})
+            self.assertEqual(resp.status_code, 401)

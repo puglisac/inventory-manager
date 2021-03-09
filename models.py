@@ -81,7 +81,7 @@ class Item(db.Model, SerializerMixin):
     quantity = db.Column(db.Integer, nullable=False)
     image_path=db.Column(db.Text)
     categories = db.relationship('Category', secondary='items_categories', backref='items')
-    user_id = db.Column(db.Integer, db.ForeignKey(User.id))
+    user_id = db.Column(db.Integer, db.ForeignKey(User.id, ondelete="SET NULL") )
 
 class Category(db.Model, SerializerMixin):
     """Category."""
