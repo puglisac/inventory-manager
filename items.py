@@ -5,6 +5,7 @@ from flask_jwt_extended import (
     jwt_required, create_access_token,
     get_jwt_identity
 )
+from s3 import upload_file_to_s3 
 
 items_blueprint = Blueprint('items_blueprint', __name__)
 
@@ -35,12 +36,11 @@ def add_item():
         return {'message': 'unauthorized'}, 401
 
     # get data from request and create new item
-    d=request.json
+    d=request.form.json
     name = d['name']
     location = d['location']
     description = d['description']
     quantity = d['quantity']
-    image_path = d['image_path']
     category_ids = d['categories']
     
     # add category ids to item
@@ -179,3 +179,9 @@ def remove_category_from_item(item_id):
         return jsonify({'item': updated_item.to_dict()})
     except: 
         return {'message':'unable to remove category'}, 500
+
+@items_blueprint.route("/test_file", methods=["POST"])
+def upload_file():
+    file=request.files['file']
+    print("**********", file.content_type)
+    print(upload_file_to_s3(file, "3.jpeg"))
