@@ -44,8 +44,8 @@ def add_item():
     description = d['description']
     quantity = d['quantity']
     category_ids = d['categories']
-    print("***********",request.files)
-    file=request.files['image']
+    if request.files:
+        file=request.files['image']
     # add category ids to item
     categories_arr=[]
     for id in category_ids:
