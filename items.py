@@ -6,6 +6,8 @@ from flask_jwt_extended import (
     get_jwt_identity
 )
 from s3 import upload_file_to_s3 
+import pathlib
+import json
 
 items_blueprint = Blueprint('items_blueprint', __name__)
 
@@ -36,13 +38,14 @@ def add_item():
         return {'message': 'unauthorized'}, 401
 
     # get data from request and create new item
-    d=request.form.json
+    d=json.loads(request.form['json'])
     name = d['name']
     location = d['location']
     description = d['description']
     quantity = d['quantity']
     category_ids = d['categories']
-    
+    print("***********",request.files)
+    file=request.files['image']
     # add category ids to item
     categories_arr=[]
     for id in category_ids:
@@ -53,7 +56,7 @@ def add_item():
                 location=location, 
                 description=description, 
                 quantity=quantity, 
-                image_path=image_path,
+                image_path=upload_file_to_s3(file, f'{name.replace(" ","")}{pathlib.Path(file.filename).suffix}'),
                 categories=categories_arr)
 
     db.session.add(item)
@@ -183,5 +186,4 @@ def remove_category_from_item(item_id):
 @items_blueprint.route("/test_file", methods=["POST"])
 def upload_file():
     file=request.files['file']
-    print("**********", file.content_type)
     print(upload_file_to_s3(file, "3.jpeg"))
