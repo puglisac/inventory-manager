@@ -183,7 +183,16 @@ def remove_category_from_item(item_id):
     except: 
         return {'message':'unable to remove category'}, 500
 
-@items_blueprint.route("/test_file", methods=["POST"])
-def upload_file():
-    file=request.files['file']
-    print(upload_file_to_s3(file, "3.jpeg"))
+
+@items_blueprint.route('/<int:item_id>/add_image', methods=["POST"])
+@jwt_required
+def upload_file(item_id):
+        # check JWT identity and return unauthorized message if user not authorized
+    token_user=get_jwt_identity()
+    accessing_user = User.query.filter_by(email=token_user).first_or_404()
+    if accessing_user.is_admin==False:
+        return {'message': 'unauthorized'}, 401
+
+    item=Item.query.get_or_404(item_id, description="item not found")
+    file=request.files['image']
+    upload_file_to_s3(file, f'{item_id.replace(" ","")}{pathlib.Path(file.filename).suffix}')
