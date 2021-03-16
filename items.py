@@ -48,17 +48,17 @@ def add_item():
     # get image file from request if present
     if request.files:
         file=request.files['image']
+        try: 
+        # upload the image to the s3 bucket and get url to image
+            uploaded_image = upload_file_to_s3(file, file.filename)
+        except:
+            return {'message':'unable to add item'}, 500
     # add category ids to item
     categories_arr=[]
     for id in category_ids:
         category = Category.query.get_or_404(id, description="category not found")
         categories_arr.append(category)
     
-    try: 
-        # upload the image to the s3 bucket and get url to image
-        uploaded_image = upload_file_to_s3(file, file.filename)
-    except:
-        return {'message':'unable to add item'}, 500
     item=Item(name=name, 
                 location=location, 
                 description=description, 
@@ -102,8 +102,9 @@ def update_item(item_id):
     # get image file from request if present and delete old image
     if request.files:
         file=request.files['image']
-        delete_file_from_s3(item.image_path)
+        
         try: 
+            delete_file_from_s3(item.image_path)
             # upload image to s3 bucket
             uploaded_image = upload_file_to_s3(file, file.filename)
             item.image_path=uploaded_image
