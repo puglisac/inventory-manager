@@ -11,7 +11,7 @@ s3 = boto3.resource(
 bucket = s3.Bucket(S3_BUCKET)
 
 
-def upload_file_to_s3(file, filename, bucket_name=S3_BUCKET, acl="public-read"):
+def upload_file_to_s3(file, filename):
 
     try:
         read_file=file.read()
@@ -23,4 +23,13 @@ def upload_file_to_s3(file, filename, bucket_name=S3_BUCKET, acl="public-read"):
         return e
     return f"https://amys-costume-shop-photos.s3.amazonaws.com/{filename}"
 
+def delete_file_from_s3(file_url):
+    try:
+        filename_arr=file_url.split("/")
+        filename=filename_arr[len(filename_arr)-1]
+        bucket.Object(filename).delete()
     
+    except Exception as e:
+        # This is a catch all exception, edit this part to fit your needs.
+        print("Something Happened: ", e)
+        return e
