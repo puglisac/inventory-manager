@@ -80,66 +80,32 @@ class TestCategoriesRoutes(TestCase):
             json={'description': 'newDescription'})
             self.assertEqual(resp.status_code, 401)
 
-    # def test_edit_user_as_admin(self):
-    #     with app.test_client() as client:
-    #         resp = client.patch("/users/test@email.com", headers={ 'Authorization': f'Bearer {TestUsersRoutes.admin_token}'}, 
-    #         json={'first_name': 'newName'})
-    #         self.assertEqual(resp.status_code, 200)
-    #         self.assertEqual(resp.json['user']['first_name'], 'newName')
+    def test_edit_Category_as_admin(self):
+        with app.test_client() as client:
+            resp = client.patch(f"/categories/{TestCategoriesRoutes.test_category_id}", headers={ 'Authorization': f'Bearer {TestCategoriesRoutes.admin_token}'}, 
+            json={'description': 'newDescription'})
+            self.assertEqual(resp.status_code, 200)
+            self.assertEqual(resp.json['category']['description'], 'newDescription')
     
-    # def test_self_edit_user(self):
-    #     with app.test_client() as client:
+    def test_delete_category(self):
+        c=Category(  name="category_to_delete",
+                        description="will be deleted")
+        db.session.add(c)
+        db.session.commit()
+        with app.test_client() as client:
+            resp = client.delete(f"/categories/{c.id}", headers={ 'Authorization': f'Bearer {TestCategoriesRoutes.admin_token}'})
+            self.assertEqual(resp.status_code, 200)
+            self.assertEqual(resp.json['message'], "category successfully deleted")
 
-    #         resp = client.patch("/users/test@email.com", headers={ 'Authorization': f'Bearer {TestUsersRoutes.token}'}, 
-    #         json={'first_name': 'newerName'})
-    #         self.assertEqual(resp.status_code, 200)
-    #         self.assertEqual(resp.json['user']['first_name'], 'newerName')
-
-    # def test_change_pwd(self):
-    #     with app.test_client() as client:
-    #         resp = client.patch("/users/test@email.com/change_password", headers={ 'Authorization': f'Bearer {TestUsersRoutes.token}'}, 
-    #         json={'existing_password': 'anotherPassword', 'new_password':'newPassowrd'})
-    #         self.assertEqual(resp.status_code, 200)
-    #         self.assertEqual(resp.json['user']['email'], 'test@email.com')
-
-    # def test_unauth_change_pwd(self):
-    #     with app.test_client() as client:
-    #         resp = client.patch("/users/test@email.com/change_password", headers={ 'Authorization': f'Bearer {TestUsersRoutes.admin_token}'}, 
-    #         json={'existing_password': 'anotherPassword', 'new_password':'newPassowrd'})
-    #         self.assertEqual(resp.status_code, 401)
-
-    # def test_wrong_change_pwd(self):
-    #     with app.test_client() as client:
-    #         resp = client.patch("/users/test@email.com/change_password", headers={ 'Authorization': f'Bearer {TestUsersRoutes.token}'}, 
-    #         json={'existing_password': 'Password', 'new_password':'newPassowrd'})
-    #         self.assertEqual(resp.status_code, 400)
-    #         self.assertEqual(resp.json['message'], "incorrect password")
-    
-    # def test_delete_user_as_admin(self):
-    #     u=User.signup(  email="to_delete@email.com",
-    #                     password="password",
-    #                     first_name="First",
-    #                     last_name="Last",
-    #                     is_admin=False)
-    #     db.session.add(u)
-    #     db.session.commit()
-    #     with app.test_client() as client:
-    #         resp = client.delete("/users/to_delete@email.com", headers={ 'Authorization': f'Bearer {TestUsersRoutes.admin_token}'})
-    #         self.assertEqual(resp.status_code, 200)
-    #         self.assertEqual(resp.json['message'], "user successfully deleted")
-
-    # def test_unauth_delete_user(self):
-    #     u=User.signup(  email="to_delete@email.com",
-    #                     password="password",
-    #                     first_name="First",
-    #                     last_name="Last",
-    #                     is_admin=False)
-    #     db.session.add(u)
-    #     db.session.commit()
-    #     with app.test_client() as client:
-    #         resp = client.delete("/users/to_delete@email.com", headers={ 'Authorization': f'Bearer {TestUsersRoutes.token}'})
-    #         self.assertEqual(resp.status_code, 401)
-    #         self.assertEqual(resp.json['message'], "unauthorized")
+    def test_unauth_delete_category(self):
+        c=Category(  name="category_to_delete",
+                        description="will be deleted")
+        db.session.add(c)
+        db.session.commit()
+        with app.test_client() as client:
+            resp = client.delete(f"/categories/{c.id}", headers={ 'Authorization': f'Bearer {TestCategoriesRoutes.token}'})
+            self.assertEqual(resp.status_code, 401)
+            self.assertEqual(resp.json['message'], "unauthorized")
 
     # def test_delete_user_as_self(self):
     #     u=User.signup(  email="to_delete@email.com",
