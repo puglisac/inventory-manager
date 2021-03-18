@@ -106,36 +106,3 @@ class TestCategoriesRoutes(TestCase):
             resp = client.delete(f"/categories/{c.id}", headers={ 'Authorization': f'Bearer {TestCategoriesRoutes.token}'})
             self.assertEqual(resp.status_code, 401)
             self.assertEqual(resp.json['message'], "unauthorized")
-
-    # def test_delete_user_as_self(self):
-    #     u=User.signup(  email="to_delete@email.com",
-    #                     password="password",
-    #                     first_name="First",
-    #                     last_name="Last",
-    #                     is_admin=False)
-    #     db.session.add(u)
-    #     db.session.commit()
-    #     with app.test_client() as client:
-    #         token_resp=client.post("/users/login", json={"email":"to_delete@email.com", "password": "password"})
-    #         token=token_resp.json['access_token']
-    #         resp = client.delete("/users/to_delete@email.com", headers={ 'Authorization': f'Bearer {token}'})
-    #         self.assertEqual(resp.status_code, 200)
-    #         self.assertEqual(resp.json['message'], "user successfully deleted")
-
-    # def test_add_item_to_user(self):
-    #     with app.test_client() as client:
-    #         resp = client.patch("/users/test@email.com/add_item", headers={ 'Authorization': f'Bearer {TestUsersRoutes.token}'},
-    #         json={'item_id': TestUsersRoutes.test_item_id})
-    #         self.assertEqual(resp.status_code, 200)
-
-    # def test_remove_item_from_user(self):
-    #     with app.test_client() as client:
-    #         resp = client.patch("/users/test@email.com/remove_item", headers={ 'Authorization': f'Bearer {TestUsersRoutes.admin_token}'},
-    #         json={'item_id': TestUsersRoutes.test_item_id})
-    #         self.assertEqual(resp.status_code, 200)
-
-    # def test_unauth_remove_item_from_user(self):
-    #     with app.test_client() as client:
-    #         resp = client.patch("/users/test@email.com/remove_item", headers={ 'Authorization': f'Bearer {TestUsersRoutes.token}'},
-    #         json={'item_id': TestUsersRoutes.test_item_id})
-    #         self.assertEqual(resp.status_code, 401)
