@@ -82,7 +82,7 @@ class TestItemsRoutes(TestCase):
 
     def test_add_item(self):
         with app.test_client() as client:
-            resp = client.post(f"/items/", headers={ 'Authorization': f'Bearer {TestItemsRoutes.admin_token}'}, 
+            resp = client.post(f"/items/", headers={ 'Authorization': f'Bearer {TestItemsRoutes.admin_token}'}, content_type='multipart/form-data',
             json={"name":"new item",
                     "location":"a place", 
                     "description":"this describes the item", 

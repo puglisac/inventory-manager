@@ -58,7 +58,7 @@ def add_item():
     for id in category_ids:
         category = Category.query.get_or_404(id, description="category not found")
         categories_arr.append(category)
-    
+
     item=Item(name=name, 
                 location=location, 
                 description=description, 
@@ -103,7 +103,7 @@ def update_item(item_id):
     if request.files:
         file=request.files['image']
         
-        try: 
+        try:
             delete_file_from_s3(item.image_path)
             # upload image to s3 bucket
             uploaded_image = upload_file_to_s3(file, file.filename)
@@ -146,7 +146,8 @@ def delete_item(item_id):
     item=Item.query.get_or_404(item_id)
     db.session.delete(item)
     try:
-        delete_file_from_s3(item.image_path)
+        if item.image_path:
+            delete_file_from_s3(item.image_path)
         # commit to db and return success message
         db.session.commit()
         return jsonify({'message': 'item successfully deleted'})

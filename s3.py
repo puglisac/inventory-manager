@@ -10,9 +10,7 @@ s3 = boto3.resource(
 
 bucket = s3.Bucket(S3_BUCKET)
 
-
 def upload_file_to_s3(file, filename):
-
     try:
         read_file=file.read()
         bucket.Object(filename).put(Body=read_file)
