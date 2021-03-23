@@ -69,7 +69,12 @@ class TestCategoriesRoutes(TestCase):
             resp = client.get(f"/categories/{TestCategoriesRoutes.test_category_id}", headers={ 'Authorization': f'Bearer {TestCategoriesRoutes.token}'})
             self.assertEqual(resp.status_code, 200)
 
-    def test_unauth_get_one_users(self):
+    def test_get_one_category_404(self):
+        with app.test_client() as client:
+            resp = client.get(f"/categories/0", headers={ 'Authorization': f'Bearer {TestCategoriesRoutes.token}'})
+            self.assertEqual(resp.status_code, 404)
+
+    def test_unauth_get_one_cagegory(self):
         with app.test_client() as client:
             resp = client.get(f"/categories/{TestCategoriesRoutes.test_category_id}", headers={ 'Authorization': f'Bearer {None}'})
             self.assertEqual(resp.status_code, 422)

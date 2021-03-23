@@ -113,8 +113,8 @@ def update_item(item_id):
 
 
     # update category ids
-    if(d['categories']):
-        category_ids = d['categories']
+    if(request.json.get('categories')):
+        category_ids = request.json['categories']
         categories_arr=[]
         for id in category_ids:
             category = Category.query.get_or_404(id, description="category not found")
