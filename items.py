@@ -1,8 +1,7 @@
 from flask import Blueprint, request, jsonify
-from sqlalchemy import func
 from models import Category, Item, Item_Category, User, db
 from flask_jwt_extended import (
-    jwt_required, create_access_token,
+    jwt_required, 
     get_jwt_identity
 )
 
@@ -136,7 +135,6 @@ def delete_item(item_id):
 def add_category_to_item(item_id):
     # adds category tag to item. requires user to be admin
     
-
     # check JWT identity and return unauthorized message if user not authorized
     token_user=get_jwt_identity()
     accessing_user = User.query.filter_by(email=token_user).first_or_404()
@@ -146,7 +144,6 @@ def add_category_to_item(item_id):
     # get item and categories and set array of categories to items.categories
     item=Item.query.get_or_404(item_id, description="item not found")
     
-
     category_to_add = Category.query.get_or_404(request.json['category_id'], description="category not found")
 
     item.categories.append(category_to_add)
