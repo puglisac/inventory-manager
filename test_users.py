@@ -105,6 +105,11 @@ class TestUsersRoutes(TestCase):
             resp = client.get("/users/test@email.com", headers={ 'Authorization': f'Bearer {TestUsersRoutes.admin_token}'})
             self.assertEqual(resp.status_code, 200)
 
+    def test_get_one_user_404(self):
+        with app.test_client() as client:
+            resp = client.get("/users/not@email.com", headers={ 'Authorization': f'Bearer {TestUsersRoutes.admin_token}'})
+            self.assertEqual(resp.status_code, 404)
+
     def test_unauth_get_one_users(self):
         with app.test_client() as client:
             resp = client.get("/users/admin_test@email.com", headers={ 'Authorization': f'Bearer {TestUsersRoutes.token}'})

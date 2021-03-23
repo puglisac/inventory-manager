@@ -108,8 +108,10 @@ class Item_Category(db.Model):
                         primary_key=True,
                         autoincrement=True)
     item_id = db.Column(db.Integer,
-                        db.ForeignKey('items.id'), 
-                        nullable=False)
+                        db.ForeignKey('items.id',ondelete="CASCADE"), 
+                        nullable=False,
+                        )
     category_id = db.Column(db.Integer,
-                        db.ForeignKey('categories.id'), 
-                        nullable=False)
+                        db.ForeignKey('categories.id',ondelete="CASCADE"), 
+                        nullable=False,
+                        )
