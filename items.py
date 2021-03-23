@@ -14,10 +14,11 @@ def get_items():
     # get all items. can accept array of category_ids in query string to filter by categories
     if request.args:
         category_arr = request.args['category_id'].split(",")
-        items = Item.query.join(Item.categories).filter(
-            Item.categories.any(Category.id.in_(category_arr))
-            ).group_by(Item.id).having(
-            func.count(Category.name) >= len(category_arr))
+        items = Item.query.join(Item.categories)
+        for id in category_arr:
+            items=items.filter(
+            Item.categories.any(Category.id==id)
+            )
     else: 
         items=Item.query.all()
     serialized_items=[i.to_dict() for i in items]
