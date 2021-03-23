@@ -1,6 +1,6 @@
 
 import boto3, botocore
-from config import S3_KEY, S3_SECRET, S3_BUCKET
+from config import S3_KEY, S3_LOCATION, S3_SECRET, S3_BUCKET
 
 s3 = boto3.resource(
     "s3",
@@ -21,7 +21,7 @@ def upload_file_to_s3(file, filename):
         # This is a catch all exception, edit this part to fit your needs.
         print("Something Happened: ", e)
         return e
-    return f"https://amys-costume-shop-photos.s3.amazonaws.com/{filename}"
+    return f"{S3_LOCATION}{filename}"
 
 def delete_file_from_s3(file_url):
     try:
