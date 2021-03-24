@@ -38,23 +38,25 @@ def add_item():
         return {'message': 'unauthorized'}, 401
 
     # get data from request and create new item
-    d=json.loads(request.form['json'])
+    d=request.json
     name = d['name']
     location = d['location']
     description = d['description']
     quantity = d['quantity']
+    image_path = d['image_path']
     category_ids = d['categories']
-
+    
     # add category ids to item
     categories_arr=[]
     for id in category_ids:
         category = Category.query.get_or_404(id, description="category not found")
         categories_arr.append(category)
-
+    
     item=Item(name=name, 
                 location=location, 
                 description=description, 
-                quantity=quantity,
+                quantity=quantity, 
+                image_path=image_path,
                 categories=categories_arr)
 
     db.session.add(item)
@@ -84,24 +86,12 @@ def update_item(item_id):
         return {'message': 'unauthorized'}, 401
 
     # get data from request and update item
-    d=json.loads(request.form['json'])
+    d=request.json
     item=Item.query.get_or_404(item_id, description = "item not found")
     for update in d:
         # don't update id
         if update != 'id' and update != 'categories':
             setattr(item, update, d[update])
-    # get image file from request if present and delete old image
-    if request.files:
-        file=request.files['image']
-        
-        try:
-            delete_file_from_s3(item.image_path)
-            # upload image to s3 bucket
-            uploaded_image = upload_file_to_s3(file, file.filename)
-            item.image_path=uploaded_image
-        except:
-            return {'message':'unable to add item'}, 500
-
 
     # update category ids
     if(request.json.get('categories')):
