@@ -45,14 +45,6 @@ def add_item():
     quantity = d['quantity']
     category_ids = d['categories']
 
-    # get image file from request if present
-    if request.files:
-        file=request.files['image']
-        try: 
-        # upload the image to the s3 bucket and get url to image
-            uploaded_image = upload_file_to_s3(file, file.filename)
-        except:
-            return {'message':'unable to add item'}, 500
     # add category ids to item
     categories_arr=[]
     for id in category_ids:
@@ -62,8 +54,7 @@ def add_item():
     item=Item(name=name, 
                 location=location, 
                 description=description, 
-                quantity=quantity, 
-                image_path=uploaded_image,
+                quantity=quantity,
                 categories=categories_arr)
 
     db.session.add(item)
@@ -205,7 +196,7 @@ def remove_category_from_item(item_id):
 
 @items_blueprint.route('/<int:item_id>/add_image', methods=["POST"])
 @jwt_required
-def upload_file(item_id):
+def add_image_to_item(item_id):
         # check JWT identity and return unauthorized message if user not authorized
     token_user=get_jwt_identity()
     accessing_user = User.query.filter_by(email=token_user).first_or_404()
@@ -213,5 +204,21 @@ def upload_file(item_id):
         return {'message': 'unauthorized'}, 401
 
     item=Item.query.get_or_404(item_id, description="item not found")
+    # get image file from request
     file=request.files['image']
-    upload_file_to_s3(file, f'{item_id.replace(" ","")}{pathlib.Path(file.filename).suffix}')
+    try: 
+        if item.image_path:
+            delete_file_from_s3(item.image_path)
+    # upload the image to the s3 bucket and get url to image
+        uploaded_image = upload_file_to_s3(file, file.filename)
+    except:
+        return {'message':'unable to add image'}, 500
+
+    item.image_path=uploaded_image
+    db.session.add(item)
+    
+    try:
+        db.session.commit()
+        return jsonify({'item': item.to_dict()})
+    except: 
+            return {'message':'unable to add image'}, 500
