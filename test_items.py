@@ -82,12 +82,11 @@ class TestItemsRoutes(TestCase):
 
     def test_add_item(self):
         with app.test_client() as client:
-            resp = client.post(f"/items/", headers={ 'Authorization': f'Bearer {TestItemsRoutes.admin_token}'}, content_type='multipart/form-data',
+            resp = client.post(f"/items/", headers={ 'Authorization': f'Bearer {TestItemsRoutes.admin_token}'},
             json={"name":"new item",
                     "location":"a place", 
                     "description":"this describes the item", 
                     "quantity":2,
-                    "image_path": None,
                     "categories":[]})
             self.assertEqual(resp.status_code, 201)
             self.assertEqual(resp.json['item']['name'], "new item")
@@ -99,7 +98,6 @@ class TestItemsRoutes(TestCase):
                     "location":"a place", 
                     "description":"this describes the item", 
                     "quantity":2,
-                    "image_path": None,
                     "categories":[]})
             self.assertEqual(resp.status_code, 401)
             self.assertEqual(resp.json['message'], "unauthorized")
