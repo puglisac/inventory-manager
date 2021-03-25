@@ -43,7 +43,6 @@ def add_item():
     location = d['location']
     description = d['description']
     quantity = d['quantity']
-    image_path = d['image_path']
     category_ids = d['categories']
     
     # add category ids to item
@@ -56,7 +55,6 @@ def add_item():
                 location=location, 
                 description=description, 
                 quantity=quantity, 
-                image_path=image_path,
                 categories=categories_arr)
 
     db.session.add(item)
@@ -189,7 +187,7 @@ def remove_category_from_item(item_id):
 def add_image_to_item(item_id):
     # stores an uploaded image and adds the path to the item. 
     # replaces existing image if image already exists.
-    
+
         # check JWT identity and return unauthorized message if user not authorized
     token_user=get_jwt_identity()
     accessing_user = User.query.filter_by(email=token_user).first_or_404()
