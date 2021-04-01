@@ -12,7 +12,7 @@ categories_blueprint = Blueprint('categories_blueprint', __name__)
 def get_categories():
     # get all categories
 
-    categories=Category.query.all()
+    categories=Category.query.order_by('name').all()
     serialized_categories=[c.to_dict() for c in categories]
     return jsonify({"categories": serialized_categories})
 
