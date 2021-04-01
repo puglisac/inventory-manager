@@ -14,7 +14,7 @@ CORS(app)
 app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DATABASE_URL', 'postgres:///inventory_manager')
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 if os.environ.get('SQLALCHEMY_ECHO'):
-    app.config['SQLALCHEMY_ECH)'] = True
+    app.config['SQLALCHEMY_ECHO)'] = True
 else:
     app.config['SQLALCHEMY_ECHO'] = False
 app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY')
