@@ -64,7 +64,7 @@ def get_all_users():
     if accessing_user.is_admin==False:
         return {'message': 'unauthorized'}, 401
     # get user and return json
-    users=User.query.all()
+    users=User.query.order_by('email').all()
     serialized_users=[u.to_dict() for u in users]
     return jsonify({"users": serialized_users})
 

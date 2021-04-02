@@ -16,13 +16,13 @@ def get_items():
     # get all items. can accept array of category_ids in query string to filter by categories
     if request.args:
         category_arr = request.args['category_id'].split(",")
-        items = Item.query.join(Item.categories)
+        items = Item.query.join(Item.categories).order_by(Item.name)
         for id in category_arr:
             items=items.filter(
             Item.categories.any(Category.id==id)
             )
     else: 
-        items=Item.query.all()
+        items=Item.query.order_by('name').all()
     serialized_items=[i.to_dict() for i in items]
     return jsonify({"items": serialized_items})
 
